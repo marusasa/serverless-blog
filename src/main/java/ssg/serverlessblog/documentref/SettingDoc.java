@@ -19,5 +19,7 @@ public class SettingDoc {
 	public final static String field_favicon_url = "favicon_url";
 	public final static String field_created_at = "created_at";
 	public final static String field_updated_at = "updated_at";
+	public final static String field_gae_ai_project_id = "gae_ai_project_id";
+	public final static String field_gae_ai_location = "gae_ai_location";
 
 }

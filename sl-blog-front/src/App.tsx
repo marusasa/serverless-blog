@@ -1,9 +1,9 @@
 import './App.css'
 import BlogTop from './components/BlogTop.tsx'
-import Posts from './components/Posts.tsx'
 import SideContents from './components/SideContents.tsx'
 import { useEffect, useState } from 'react';
 import Loading from "./m/components/Loading";
+import { Outlet } from "react-router-dom";
 
 function App() {
 
@@ -56,8 +56,8 @@ function App() {
 						</div>
 					</div>
 					<div className="grid grid-cols-4">
-						<div className={showAboutMe? ' hidden ':'' + " col-span-4 md:col-span-3"}>
-							<Posts/>
+						<div className={showAboutMe? ' hidden ':'' + " col-span-4 md:col-span-3"}>							
+							<Outlet />
 						</div>
 						<div className={showAboutMe? ' col-span-4 ': ' hidden ' + "  md:col-span-1 md:block md:pl-4"}>
 							<SideContents></SideContents>

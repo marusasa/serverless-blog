@@ -4,6 +4,8 @@ export type PostType = {
 	status: string;
 	articleId: string;
 	publishedAt: string;
+	createdAt: string;
+	summary: string;
 }
 
 

@@ -16,4 +16,5 @@ public interface PageComponentDaoInt {
 	public boolean updatePageComponent(String accountId, String pageComponentId, String json, long order, boolean enabled) throws Exception;
 	public List<CloudDocument> getPageComponents(String accountId) throws Exception;
 	public Optional<CloudDocument> getPageComponent(String accountId, String pageComponentId) throws Exception;
+	public boolean deletePageComponent(String accountId, String pageComponentId) throws Exception;	
 }

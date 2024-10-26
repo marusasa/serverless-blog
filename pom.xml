@@ -50,7 +50,11 @@
 		<dependency>
 			<groupId>com.google.cloud</groupId>
 			<artifactId>google-cloud-firestore</artifactId>
-		</dependency>		
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-vertexai</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -74,6 +78,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.4.1</version>
 				<configuration>
 					<archive>
 						<manifest>
@@ -89,7 +94,7 @@
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>2.7.0</version>
 				<configuration>
-					<version>0-1-0</version>
+					<version>0-1-1</version>
 					<!-- 
 						set your google cloud project id here.
 						Or set is as system property.

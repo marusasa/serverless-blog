@@ -1,6 +1,7 @@
 package ssg.serverlessblog.system;
 
 import java.util.Date;
+import java.util.Optional;
 
 import org.eclipse.jetty.server.session.SessionDataStore;
 import org.slf4j.Logger;
@@ -28,7 +29,7 @@ public class Env {
 	static Logger logger = LoggerFactory.getLogger(Env.class);
 	
 	static final boolean isGae = isClassExists("ssg.serverlessblog.gae.dao.SettingDao");
-	private static String singleTenantAccountId = "";
+	private static Optional<String> singleTenantAccountId = Optional.empty();
 	
 	static public SettingDaoInt settingDao = null; 
 	static public ArticleDaoInt articleDao = null;
@@ -76,18 +77,18 @@ public class Env {
 		return result;
 	}
 	
-	public static String getAccountIdToUse(Context ctx) {		
-		if(AppProperties.isSingleTenant) {
-			return singleTenantAccountId;
+	public static String getAccountIdToUse(Context ctx) throws Exception {		
+		if(AppProperties.getBoolean("env.is-single-tenant")) {
+			if(singleTenantAccountId.isEmpty()) {
+				singleTenantAccountId = Optional.of(Env.systemDao.getSingleTenantAccoundId());
+				logger.info("Default account ID loaded.");
+			}			
+			return singleTenantAccountId.get();
 		}else {
 			//TBD...
 			logger.error("Account ID requested for non-single tenant environment. This is not implemented yet.");
 			return "";
 		}
-	}
-
-	public static void setSingleTenantAccountId(String singleTenantAccountId) {
-		Env.singleTenantAccountId = singleTenantAccountId;
 	}
 	
 	

@@ -4,6 +4,13 @@ import static io.javalin.apibuilder.ApiBuilder.get;
 import static io.javalin.apibuilder.ApiBuilder.patch;
 import static io.javalin.apibuilder.ApiBuilder.path;
 import static io.javalin.apibuilder.ApiBuilder.post;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
+
 import static io.javalin.apibuilder.ApiBuilder.delete;
 
 import org.eclipse.jetty.server.session.NullSessionCache;
@@ -22,6 +29,7 @@ import ssg.serverlessblog.controller.PageComponentController;
 import ssg.serverlessblog.controller.SettingController;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.documentref.UserDoc;
+import ssg.serverlessblog.handler.ArticleGet;
 import ssg.serverlessblog.handler.ArticleGetList;
 import ssg.serverlessblog.handler.BasicInfoHandler;
 import ssg.serverlessblog.handler.LoginHandler;
@@ -34,8 +42,7 @@ import ssg.serverlessblog.util.AppProperties;
  */
 public class BlogMain {
 
-	static Logger logger = LoggerFactory.getLogger(BlogMain.class);
-	
+	static Logger logger = LoggerFactory.getLogger(BlogMain.class);	
 	
 	public static void main(String[] args) {
 		var app = Javalin.create(config -> {
@@ -60,7 +67,7 @@ public class BlogMain {
 				jettyContext.getSessionHandler().getSessionCookieConfig().setMaxAge(31_536_000);	//365 days * 24h * 60min * 60 sec = 31,536,000
 			});
 						
-			if(AppProperties.isTest) {
+			if(AppProperties.getBoolean("env.is-test")) {
 				config.bundledPlugins.enableCors(cors -> {
 			        cors.addRule(it -> {
 			        	 it.anyHost();
@@ -87,6 +94,9 @@ public class BlogMain {
 						path("/{articleId}",() -> {
 							get(ArticleController::getArticle);
 							delete(ArticleController::deleteArticle);
+							path("ai-summary",() ->{
+								get(ArticleController::getAiSummary);
+							});
 						});
 					});
 					path("setting", () ->{
@@ -98,38 +108,48 @@ public class BlogMain {
 					});
 					path("/components", () ->{
 						get(PageComponentController::getList);
-						path("/profile-pic",() -> {
-							post(PageComponentController::createProfilePic);
-							path("/{pageComponentId}",() -> {
-								patch(PageComponentController::updateProfilePic);
-							});
-						});
-						path("/link-list",() -> {
-							post(PageComponentController::createLinkList);
-							path("/{pageComponentId}",() -> {
-								patch(PageComponentController::updateLinkList);
-							});
-						});
-						path("/text-box",() -> {
-							post(PageComponentController::createTextBox);
-							path("/{pageComponentId}",() -> {
-								patch(PageComponentController::updateTextBox);
-							});
-						});
+						post(PageComponentController::createNewDefault);
 						path("/{pageComponentId}",() -> {
 							get(PageComponentController::getItem);
+							delete(PageComponentController::deleteItem);
+							path("/profile-pic",() -> {
+								patch(PageComponentController::updateProfilePic);
+							});
+							path("/link-list",() -> {
+								patch(PageComponentController::updateLinkList);
+							});
+							path("/text-box",() -> {
+								patch(PageComponentController::updateTextBox);
+							});
 						});
 					});					
 				});
 			});
 		});
+		
+		
 		/*----------------------------------------------------
 		 * These are for public requests. No login required.
 		 ---------------------------------------------------*/
-		app.get("/basic-info", new BasicInfoHandler());
+		app.get("/basic-info", new BasicInfoHandler());		
 		app.get("/articles", new ArticleGetList());
+		app.get("/articles/{articleId}", new ArticleGet());
 		app.post("/login", new LoginHandler());
 		app.get("/components", new PageComponentHandler());
+		
+		/*
+		 * Redirect some path to index.
+		 */
+		ClassLoader classloader = Thread.currentThread().getContextClassLoader();
+		InputStream is = classloader.getResourceAsStream("public/index.html");		
+		try(InputStreamReader isr = new InputStreamReader(is);){
+			String indexHtml = new BufferedReader(isr)
+					   .lines().collect(Collectors.joining("\n"));
+			app.get("/post/*", ctx -> {ctx.html(indexHtml);});
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
 		
 		//--------------------------------------------------------------
 		//Make sure user is logged in for management REST
@@ -159,8 +179,10 @@ public class BlogMain {
 		});
 		
 		//Make sure datastore is ready.
-		firstRun();		
-
+		if(AppProperties.getBoolean("env.run-first-run")) {
+			firstRun();		
+		}
+		
 		app.start(8080);
 		
 	}
@@ -189,32 +211,22 @@ public class BlogMain {
 			int accountsCount = Env.systemDao.getAccountsSize();
 			if(accountsCount == 0) {
 				//Account data doesn't exists. Create the default account.
-				String accountId = Env.systemDao.createInitialSystemData();
-				if(AppProperties.isSingleTenant) {
-					Env.setSingleTenantAccountId(accountId);
-				}				
+				Env.systemDao.createInitialSystemData();
 				logger.info("***************************************************************");
 				logger.info("* Initial Data Preparation Completed.");
 				logger.info("***************************************************************");
 			}else if(accountsCount == 1) {
 				var message = "No action.";
-				if(AppProperties.isSingleTenant) {
-					//get the document id of the item found.
-					//Assuming this is the only document in data store.
-					Env.setSingleTenantAccountId(Env.systemDao.getSingleTenantAccoundId());
-					message = "Default account ID loaded.";
-				}
-				
 				logger.info("***************************************************************");
 				logger.info("* Initial Data Checked. %s ".formatted(message));
 				logger.info("***************************************************************");
 			}else {
 				//size is >= 2. 
-				if(AppProperties.isSingleTenant) {
+				if(AppProperties.getBoolean("env.is-single-tenant")) {
 					logger.error("***************************************************************");
 					logger.error("* Initial Data Check Result: ");
 					logger.error("* Detected multiple account record for single tenant system.");
-					logger.error("* This is an error. Default account ID NOT loaded.");
+					logger.error("* This is an error.");
 					logger.error("***************************************************************");					
 				}else {
 					logger.info("***************************************************************");
@@ -227,9 +239,7 @@ public class BlogMain {
 			logger.info("***************************************************************");
 			logger.info("* Initial Data Preparation - Error occurred. Check Datastore. ");
 			logger.info("***************************************************************");
-		}		
-		
-					
+		}			
 	}
-
+	
 }

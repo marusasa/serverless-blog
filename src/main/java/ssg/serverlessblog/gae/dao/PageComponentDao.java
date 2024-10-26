@@ -36,6 +36,35 @@ public class PageComponentDao implements PageComponentDaoInt {
 
 	private static final Logger logger = LoggerFactory.getLogger(PageComponentDaoInt.class);
 	
+	
+	
+	@Override
+	public boolean deletePageComponent(String accountId, String pageComponentId) throws Exception {
+		var result = false;
+		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
+			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
+			DocumentReference docRef = db.collection(PageComponentDoc.collection).document(pageComponentId);
+			
+			ApiFuture<DocumentSnapshot> future = docRef.get();
+			DocumentSnapshot document = future.get();
+			if(!document.exists()) {
+				logger.warn("PageComponent document not found: %s".formatted(pageComponentId));
+				return result;
+			}
+			
+			DocumentReference refAccount = (DocumentReference)document.get(PageComponentDoc.field_ref_account_id); 
+			if(!refAccount.equals(accountDocRef)) {
+				logger.warn("Article %s not authorized with account %s".formatted(pageComponentId,accountId));
+				return result;
+			}		
+			
+			ApiFuture<WriteResult> writeResult = docRef.delete();
+			writeResult.get();
+			result = true;
+		}
+		return result;
+	}
+
 	@Override
 	public Optional<CloudDocument> getPageComponent(String accountId, String pageComponentId) throws Exception {
 		Optional<CloudDocument> result = Optional.empty();

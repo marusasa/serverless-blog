@@ -53,8 +53,15 @@ public class SystemDao implements SystemDaoInt {
 	public String getSingleTenantAccoundId() throws Exception {
 		var accountId = "";
 		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).limit(1).get();
-			accountId = q.get().getDocuments().getFirst().getId();
+			ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).get();
+			var list = q.get().getDocuments();
+			if(list.size() > 1) {
+				throw new Exception("More than one account record found. This shouldn't happen.");
+			}else if(list.size() == 0) {
+				throw new Exception("Account record not found. This shouldn't happen.");
+			}else if(list.size() == 1) {			
+				accountId = list.getFirst().getId();
+			}
 		}catch(Exception e) {
 			throw e;
 		}
@@ -80,11 +87,16 @@ public class SystemDao implements SystemDaoInt {
 				accountId = accountDocRef.getId();
 			}
 			//create user data.
+			var pass = "";
 			{
 				Map<String, Object> data = new HashMap<>();
 				data.put(UserDoc.field_ref_account_id, accountDocRef);
 				Optional<String> salt = PasswordUtil.generateSalt(30);
-				Optional<String> password = PasswordUtil.hashPassword("blogPass",salt.get());
+				
+				//generate password
+				pass = "blogPass_" + PasswordUtil.generateSalt(5).get();
+				
+				Optional<String> password = PasswordUtil.hashPassword(pass,salt.get());
 				data.put(UserDoc.field_salt, salt.get());
 				data.put(UserDoc.field_password, password.get());
 				data.put(UserDoc.field_created_at, Timestamp.now());
@@ -100,14 +112,18 @@ public class SystemDao implements SystemDaoInt {
 				data.put(SettingDoc.field_blog_title, "My Blog");
 				data.put(SettingDoc.field_blog_subtitle, "Subtitle goes here");
 				data.put(SettingDoc.field_created_at, Timestamp.now());
-				data.put(SettingDoc.field_updated_at, null);					
+				data.put(SettingDoc.field_icon_url, "");
+				data.put(SettingDoc.field_favicon_url, "");
+				data.put(SettingDoc.field_updated_at, null);
+				data.put(SettingDoc.field_gae_ai_project_id, "");
+				data.put(SettingDoc.field_gae_ai_location, "");
 				ApiFuture<DocumentReference> docRef = db.collection(SettingDoc.collection).add(data);
 				docRef.get();
 				logger.info("Setting data created.");
 			}
 			//Create sample article.
 			{
-				Env.articleDao.createArticle(getSingleTenantAccoundId(), SampleDataUtil.getSampleArticle());
+				Env.articleDao.createArticle(getSingleTenantAccoundId(), SampleDataUtil.getSampleArticle(pass));
 			}
 			//Create Page components.
 			{

@@ -53,11 +53,9 @@ function ManageApp() {
 						<div className="drawer-side">
 							<label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
 							<ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-								{/* Sidebar content here */}
-								<li><Link to="/m/posts/new">New Post</Link></li>
 								<li><Link to="/m/posts">Manage Posts</Link></li>
-								<li><Link to="/m/setting">Setting</Link></li>
 								<li><Link to="/m/components">Manage Page Components</Link></li>
+								<li><Link to="/m/setting">Setting</Link></li>
 								<li><a href="/">Show Blog</a></li>
 							</ul>
 						</div>

@@ -59,7 +59,7 @@ function PageCompEdit() {
 				}
 			}
 
-			await fetch('/mng/components/' + action + "/" + pageComponentId, {
+			await fetch('/mng/components/' + pageComponentId + '/' + action, {
 				method: 'PATCH',
 				body: JSON.stringify({
 					data: JSON.parse(data),
@@ -91,6 +91,30 @@ function PageCompEdit() {
 		}
 	};
 	
+	const deleteComp = async () => {
+			   await fetch('/mng/components/' + pageComponentId, {
+			      method: 'DELETE',
+			      headers: {
+			         'Content-type': 'application/json; charset=UTF-8',
+			      },
+			   })
+			      .then((response) => response.json())
+			      .then((data) => {
+						if(data.result == 'success'){
+							navigate('/m/components');					
+						}else{
+							alert(JSON.stringify(data.messages));
+						}
+			      })
+			      .catch((err) => {
+					alert('Failed to delete data.');
+			         console.log(err.message);
+			      })
+				 .finally(() => {
+					setInProcess(false);
+				 });
+			};
+	
 	const handleSave = (e: React.FormEvent) => {
 	   e.preventDefault();
 	   setInProcess(true);
@@ -99,7 +123,12 @@ function PageCompEdit() {
 	const handleCancel = () => {
 		navigate('/m/components');
 	};
-	
+	const handleDelete = (e: React.FormEvent) => {
+		e.preventDefault();
+		if(confirm('Delete record?')){
+			deleteComp();
+		}
+	};
 	return (
 		<>
 			<FormTitle text="Edit Component"/>
@@ -108,6 +137,7 @@ function PageCompEdit() {
 				<form onSubmit={handleSave}>
 					<div className="flex">
 						<SubmitButton text="Save" inProcess={inProcess}/>
+						<button className="btn btn-sm btn-accent mr-3" onClick={handleDelete}>Delete</button>	
 						<button className="btn btn-sm" onClick={handleCancel}>Cancel</button>
 					</div>
 					<label className="form-control mb-4">

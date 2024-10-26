@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { useNavigate } from "react-router-dom";
 
 function Login() {
 
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
-	const navigate = useNavigate();
 	
 	const login = async (username: string, password: string) => {
 		   await fetch('/login', {
@@ -21,7 +19,7 @@ function Login() {
 		      .then((response) => response.json())
 		      .then((data) => {
 				if (data.result == 'success') {
-					navigate('/m/');
+					window.location.replace('/m');
 				}else{
 					alert("Login failed.");
 				}

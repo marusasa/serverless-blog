@@ -8,7 +8,7 @@ package ssg.serverlessblog.data_json;
  * This record type uses Builder Pattern since it has many fields.
  */
 public record Article (String title, String body, String status, String articleId, 
-		String createdAt, String publishedAt) {
+		String createdAt, String publishedAt, String summary) {
 	
 	public static class Builder {
         private String title;
@@ -17,6 +17,12 @@ public record Article (String title, String body, String status, String articleI
         private String articleId;
         private String createdAt;
         private String publishedAt;
+        private String summary;
+        
+        public Builder summary(String summary) {
+        	this.summary = summary;
+        	return this;
+        }
         
         public Builder title(String title) {
 			this.title = title;
@@ -49,7 +55,7 @@ public record Article (String title, String body, String status, String articleI
 		}
 
 		public Article build() {
-            return new Article(title,body,status,articleId,createdAt,publishedAt);
+            return new Article(title,body,status,articleId,createdAt,publishedAt,summary);
         }
     }
 }

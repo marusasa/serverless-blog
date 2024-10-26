@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import ssg.serverlessblog.data_json.Article;
+import ssg.serverlessblog.data_json.ResultAiSummary;
 import ssg.serverlessblog.data_json.ResultArticle;
 import ssg.serverlessblog.data_json.ResultArticleList;
 import ssg.serverlessblog.data_json.ResultBase;
@@ -24,6 +25,26 @@ import ssg.serverlessblog.util.DateTimeUtil;
 public class ArticleController {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArticleController.class.getName());
+	
+	public static void getAiSummary(Context ctx) {
+		ResultAiSummary result = new ResultAiSummary();
+		try {
+			String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+			String articleId = ctx.pathParam("articleId");
+			
+			//generate
+			String summary = Env.articleDao.generateAiSummary(accountId, articleId);
+			result.setSummary(summary);
+			
+			result.setResult(AppConst.RESULT_SUCCESS);
+		}catch(Exception e) {
+			logger.error("Error generating ai summary.",e);
+			result.getMessages().add("Error generating ai summary.");
+		}
+		
+		
+		ctx.json(result);
+	}
 	
 	public static void createArticle(Context ctx) {
 		ResultBase result = new ResultBase();
@@ -49,7 +70,7 @@ public class ArticleController {
 			final String articleId = ctx.pathParam("articleId");
 			String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			
-			Optional<CloudDocument> op = Env.articleDao.getArticle(accountId, articleId); 
+			Optional<CloudDocument> op = Env.articleDao.getArticleForManage(accountId, articleId); 
 						
 			if(op.isEmpty()) {
 				result.getMessages().add("Article not obtained.");
@@ -67,7 +88,9 @@ public class ArticleController {
 					.status(document.getString(ArticleDoc.field_status))
 					.articleId(document.getId())
 					.createdAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)))
-					.publishedAt(publishedAt).build();
+					.publishedAt(publishedAt)
+					.summary(document.getString(ArticleDoc.field_summary))
+					.build();
 			result.setArticle(article);
 			result.setResult(AppConst.RESULT_SUCCESS);
 		}catch(Exception e) {
@@ -125,13 +148,13 @@ public class ArticleController {
 				if(document.getString(ArticleDoc.field_status).equals(AppConst.ART_STATUS_PUBLISH)) {
 					publishedAt = DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_published_at));
 				}
-				var article = new Article(
-						document.getString(ArticleDoc.field_title),
-						document.getString(ArticleDoc.field_body),
-						document.getString(ArticleDoc.field_status),
-						document.getId(),
-						DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)),
-						publishedAt);				
+				var article = new Article.Builder().title(document.getString(ArticleDoc.field_title))
+						.body(document.getString(ArticleDoc.field_body))
+						.status(document.getString(ArticleDoc.field_status))
+						.articleId(document.getId())
+						.createdAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)))
+						.publishedAt(publishedAt)
+						.build();								
 				result.getArticles().add(article);
 			}			
 			result.setResult(AppConst.RESULT_SUCCESS);

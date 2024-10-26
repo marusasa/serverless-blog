@@ -17,6 +17,8 @@ function PostListItem({ article }: { article: PostType }) {
 			<tr>
 				<th>{article.title}</th>
 				<td>{article.status}</td>
+				<td>{article.createdAt}</td>
+				<td>{article.publishedAt}</td>
 				<td><button className="btn btn-outline btn-primary" onClick={handleEdit}>Edit</button></td>
 			</tr>
 		</>

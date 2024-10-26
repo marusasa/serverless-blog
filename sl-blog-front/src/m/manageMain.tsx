@@ -18,16 +18,16 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
   	<BrowserRouter>
   		<Routes>
-			<Route path="/m/" element={<ManageApp />} >
-				<Route path="/m/posts/new" element={<PostNew />} />
-				<Route path="/m/posts/edit" element={<PostEdit />} />
-				<Route path="/m/posts" element={<PostList />} />
-				<Route path="/m/setting" element={<SettingEdit />} />
-				<Route path="/m/components" element={<PageCompList />} />
-				<Route path="/m/components/edit" element={<PageCompEdit />} />
+			<Route path="m" element={<ManageApp />} >
+				<Route path="posts" element={<PostList />} />
+				<Route path="posts/edit" element={<PostEdit />} />
+				<Route path="posts/new" element={<PostNew />} />
+				<Route path="setting" element={<SettingEdit />} />
+				<Route path="components" element={<PageCompList />} />
+				<Route path="components/edit" element={<PageCompEdit />} />
 			</Route>
-			<Route path="/login/" element={<LoginApp />} >
-				<Route path="/login/login" element={<Login />} />
+			<Route path="login" element={<LoginApp />} >
+				<Route path="login" element={<Login />} />
 			</Route>
 		</Routes>
     </BrowserRouter>

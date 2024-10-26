@@ -34,6 +34,7 @@ Notice: The application is missing some basic features now.
 
 - An account with Google Cloud Platform with billing enabled.
 - A project in Google Cloud
+- To enable AI Summary, 'Gemini API' must be enabled within the Google Cloud project.
 
 # How to deploy
 
@@ -42,6 +43,34 @@ Notice: The application is missing some basic features now.
 ```
 	gcloud init
 ```
+
+- Create an App Engine application, if you haven't done it yet.
+
+```
+	gcloud app create
+```
+
+- By default, the '(default)' datastore is in non-native 'Datastore' mode. Convert it to Firestore native. 
+Optionally, you can delete the existing one and create a new database in navive firestore mode, setting your
+desired db location. 
+Name it '(default)'.
+
+```
+	gcloud firestore databases update --type=firestore-native
+```
+
+- Add needed indexes.
+
+```
+	gcloud firestore indexes composite create --collection-group=page-components --field-config=field-path=ref_account_id,order=ascending --field-config=field-path=view_order,order=ascending
+```
+```
+	gcloud firestore indexes composite create --collection-group=articles --field-config=field-path=ref_account_id,order=ascending --field-config=field-path=status,order=ascending --field-config=field-path=published_at,order=descending
+```
+```
+	gcloud firestore indexes composite create --collection-group=articles --field-config=field-path=ref_account_id,order=ascending --field-config=field-path=created_at,order=descending
+```
+
 
 - Edit pom.xml, update app engine config:
 	

@@ -14,9 +14,11 @@ import ssg.serverlessblog.util.CloudDocument;
  */
 public interface ArticleDaoInt {
 	public String createArticle(String accountId,Article article) throws Exception;
-	public Optional<CloudDocument> getArticle(String accountId,String articleId) throws Exception;
+	public Optional<CloudDocument> getArticleForManage(String accountId,String articleId) throws Exception;
+	public Optional<CloudDocument> getArticle(String articleId) throws Exception;
 	public boolean updateArticle(String accountId,Article article) throws Exception;
 	public List<CloudDocument> getArticlesForManage(String accountId) throws Exception;
 	public List<CloudDocument> getArticlesForBlog(String accountId) throws Exception;
 	public boolean deleteArticle(String accountId, String articleId) throws Exception;	
+	public String generateAiSummary(String accountId, String articleId) throws Exception;
 }

@@ -6,7 +6,7 @@ public class ResultArticle extends ResultBase {
 	/**
 	 * For service result, always instantiate an object to prevent null situation.
 	 */
-	private Article article = new Article("","","","","","");
+	private Article article = null;
 
 	public Article getArticle() {
 		return article;
