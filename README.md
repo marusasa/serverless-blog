@@ -6,7 +6,7 @@ Currently supporting Google Cloud, but planned to support AWS in the future.
 
 The server is currently running my personal blog at: [https://sasagu.com](https://sasagu.com).
 
-Notice: The application is missing some basic features now.
+**Notice: The application is in Alpha stage. It is missing some basic features.**
 
 # Highlight
 
