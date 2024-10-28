@@ -56,8 +56,8 @@ public class Env {
 		}
 	}
 
-	public static Date getDate(CloudDocument doc, String fieldId) {
-		return dataUtil.getDate(doc, fieldId);
+	public static String getJavaScriptUtcDateTime(CloudDocument doc, String fieldId) {		
+		return dataUtil.getUtcString(doc, fieldId);
 	}
 	
 	private static Object getClassObject(String className) throws Exception{

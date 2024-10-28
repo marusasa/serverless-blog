@@ -81,13 +81,13 @@ public class ArticleController {
 			CloudDocument document = op.get();
 			var publishedAt = "";
 			if(document.getString(ArticleDoc.field_status).equals(AppConst.ART_STATUS_PUBLISH)) {
-				publishedAt = DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_published_at));
+				publishedAt = Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at);
 			}
 			var article = new Article.Builder().title(document.getString(ArticleDoc.field_title))
 					.body(document.getString(ArticleDoc.field_body))
 					.status(document.getString(ArticleDoc.field_status))
 					.articleId(document.getId())
-					.createdAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)))
+					.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
 					.publishedAt(publishedAt)
 					.summary(document.getString(ArticleDoc.field_summary))
 					.build();
@@ -146,13 +146,14 @@ public class ArticleController {
 			for (CloudDocument document : list) {				
 				var publishedAt = "";
 				if(document.getString(ArticleDoc.field_status).equals(AppConst.ART_STATUS_PUBLISH)) {
-					publishedAt = DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_published_at));
+					publishedAt = Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at);
 				}
+				
 				var article = new Article.Builder().title(document.getString(ArticleDoc.field_title))
 						.body(document.getString(ArticleDoc.field_body))
 						.status(document.getString(ArticleDoc.field_status))
 						.articleId(document.getId())
-						.createdAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)))
+						.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
 						.publishedAt(publishedAt)
 						.build();								
 				result.getArticles().add(article);

@@ -47,8 +47,8 @@ public class ArticleGetList implements Handler {
 						.body(body)
 						.status(document.getString(ArticleDoc.field_status))
 						.articleId(document.getId())
-						.createdAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)))
-						.publishedAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_published_at)))
+						.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
+						.publishedAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
 						.summary(document.getString(ArticleDoc.field_summary))
 						.build();
 				result.getArticles().add(article);

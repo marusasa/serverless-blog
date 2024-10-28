@@ -124,7 +124,7 @@ public class ArticleDao implements ArticleDaoInt {
 			DocumentReference docRef = db.collection(ArticleDoc.collection).document(articleId);			
 			ApiFuture<DocumentSnapshot> future = docRef.get();
 			DocumentSnapshot document = future.get();
-			if(document.exists()) {
+			if(document.exists()) {				
 				result = Optional.of(new CloudDocument(document.getId(), document.getData()));
 			}else {
 				logger.warn("Article document not found: %s".formatted(articleId));

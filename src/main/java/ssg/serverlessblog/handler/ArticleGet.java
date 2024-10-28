@@ -44,8 +44,8 @@ public class ArticleGet implements Handler {
 						.body(document.getString(ArticleDoc.field_body))
 						.status(document.getString(ArticleDoc.field_status))
 						.articleId(document.getId())
-						.createdAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_created_at)))
-						.publishedAt(DateTimeUtil.formatDateAndTime(Env.getDate(document, ArticleDoc.field_published_at)))
+						.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
+						.publishedAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
 						.build();
 				result.setArticle(article);
 				result.setResult(AppConst.RESULT_SUCCESS);

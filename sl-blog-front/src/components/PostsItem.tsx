@@ -4,9 +4,11 @@ import {useRef } from 'react';
 
 function PostsItem({article}:{article:PostType}) {
 
-	const pubDateYYYYMMDD = article.publishedAt.substring(0,10);
-	const pubDate = new Date(pubDateYYYYMMDD);
-	const dateText = pubDate.toLocaleDateString(undefined, {timeZone: 'UTC'});
+	//article.publishedAt will be in UTC timezone with
+	//format: '2024-10-25T04:36:17.743Z'
+	const pubDateYYYYMMDD = article.publishedAt.substring(0,10);	//result yyyy-mm-dd format.
+	const pubDate = new Date(article.publishedAt);
+	const dateText = pubDate.toLocaleDateString();
 	const link = convertToAllowedChars(article.title) + "_" + article.articleId;
 	const dialogRef = useRef(null);
 	

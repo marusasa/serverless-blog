@@ -11,5 +11,5 @@ import ssg.serverlessblog.util.CloudDocument;
  * (At the moment there is only one implementation.
  */
 public interface DataUtilInt {
-	public Date getDate(CloudDocument doc, String fieldId);
+	public String getUtcString(CloudDocument doc, String fieldId);
 }

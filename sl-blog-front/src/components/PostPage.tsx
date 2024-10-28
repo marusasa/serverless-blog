@@ -12,8 +12,8 @@ function PostPage() {
 			if (articleRes.result == 'success') {
 				setArticle(articleRes.article);
 				setPubDateYYYYMMDD(articleRes.article.publishedAt.substring(0, 10));
-				const pubDate = new Date(pubDateYYYYMMDD);
-				setDateText(pubDate.toLocaleDateString(undefined, { timeZone: 'UTC' }));
+				const pubDate = new Date(articleRes.article.publishedAt);
+				setDateText(pubDate.toLocaleDateString());
 			} else {
 				alert('Post not loaded.');
 			}
