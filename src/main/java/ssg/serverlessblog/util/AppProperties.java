@@ -24,7 +24,7 @@ public class AppProperties {
 	}
 	
 	public static String getString(String name) {
-		return get().getProperty("name");
+		return get().getProperty(name);
 	}
 	
 	public static boolean getBoolean(String name) {

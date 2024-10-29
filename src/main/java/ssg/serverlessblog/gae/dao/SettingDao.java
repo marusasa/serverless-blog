@@ -1,21 +1,21 @@
 package ssg.serverlessblog.gae.dao;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.FieldPath;
-import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 
 import ssg.serverlessblog.data_json.Setting;
-import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
 import ssg.serverlessblog.interfaces.SettingDaoInt;
@@ -29,14 +29,21 @@ import ssg.serverlessblog.util.CloudDocument;
  */
 public class SettingDao implements SettingDaoInt{	
 	
+	private CollectionReference settings = null;
+	private CollectionReference collection() throws IOException {
+		if(settings == null) {
+			settings = FirestoreDbUtil.getFirestoreDbObj().collection(SettingDoc.collection);
+		}
+		return settings;
+	}
+	
 	@Override
 	public void updateSetting(String accountId, Setting setting) throws Exception{
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){			
-			
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
 			//Search document where account id and setting id matches.
-			Query query = db.collection(SettingDoc.collection)					
+			Query query = collection()					
 					.whereEqualTo(SettingDoc.field_ref_account_id, accountDocRef)
 					.whereEqualTo(FieldPath.documentId(), setting.settingId());
 			
@@ -67,11 +74,10 @@ public class SettingDao implements SettingDaoInt{
 	@Override
 	public Optional<CloudDocument> getSetting(String accountId) throws Exception{
 		Optional<CloudDocument> result = Optional.empty();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
+		try {			
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
-			
-			Query query = db.collection(SettingDoc.collection)					
+			Query query = collection()					
 					.whereEqualTo(SettingDoc.field_ref_account_id, accountDocRef);
 			
 			//get Settings document

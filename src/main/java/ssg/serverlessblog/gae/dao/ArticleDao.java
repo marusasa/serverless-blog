@@ -1,47 +1,36 @@
 package ssg.serverlessblog.gae.dao;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.checkerframework.checker.calledmethods.qual.EnsuresCalledMethodsVarargs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.Query.Direction;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 import com.google.cloud.vertexai.VertexAI;
-import com.google.cloud.vertexai.api.Blob;
-import com.google.cloud.vertexai.api.Content;
 import com.google.cloud.vertexai.api.GenerateContentResponse;
 import com.google.cloud.vertexai.api.GenerationConfig;
 import com.google.cloud.vertexai.api.HarmCategory;
-import com.google.cloud.vertexai.api.Part;
 import com.google.cloud.vertexai.api.SafetySetting;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
-import com.google.cloud.vertexai.generativeai.PartMaker;
 import com.google.cloud.vertexai.generativeai.ResponseStream;
-import com.google.protobuf.ByteString;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 import ssg.serverlessblog.data_json.Article;
-import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
@@ -60,11 +49,19 @@ public class ArticleDao implements ArticleDaoInt {
 
 	private static final Logger logger = LoggerFactory.getLogger(ArticleDao.class);
 	
+	private CollectionReference articles = null;
+	private CollectionReference collection() throws IOException {
+		if(articles == null) {
+			articles = FirestoreDbUtil.getFirestoreDbObj().collection(ArticleDoc.collection);
+		}
+		return articles;
+	}
+		
 	@Override
 	public String createArticle(String accountId,Article article) throws Exception {
 		var newId = "";
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
 			//add article to database
 			Map<String, Object> data = new HashMap<>();
@@ -82,7 +79,7 @@ public class ArticleDao implements ArticleDaoInt {
 			data.put(ArticleDoc.field_summary, "");	//initially blank
 			data.put(ArticleDoc.field_summary_ai, true);
 			
-			ApiFuture<DocumentReference> docRef = db.collection(ArticleDoc.collection).add(data);
+			ApiFuture<DocumentReference> docRef = collection().add(data);
 			newId = docRef.get().getId();
 		}catch(Exception e) {
 			throw e;
@@ -94,9 +91,9 @@ public class ArticleDao implements ArticleDaoInt {
 	public Optional<CloudDocument> getArticleForManage(String accountId,String articleId) 
 			throws Exception {
 		Optional<CloudDocument> result = Optional.empty();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
-			DocumentReference docRef = db.collection(ArticleDoc.collection).document(articleId);			
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			DocumentReference docRef = collection().document(articleId);			
 			ApiFuture<DocumentSnapshot> future = docRef.get();
 			DocumentSnapshot document = future.get();
 			if(!document.exists()) {
@@ -112,6 +109,8 @@ public class ArticleDao implements ArticleDaoInt {
 				logger.warn("Article %s not authorized with account %s".formatted(articleId,accountId));
 				return result;
 			}						
+		}catch(Exception e) {
+			throw e;
 		}
 		return result;
 	}
@@ -120,8 +119,8 @@ public class ArticleDao implements ArticleDaoInt {
 	public Optional<CloudDocument> getArticle(String articleId) 
 			throws Exception {
 		Optional<CloudDocument> result = Optional.empty();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference docRef = db.collection(ArticleDoc.collection).document(articleId);			
+		try {
+			DocumentReference docRef = collection().document(articleId);			
 			ApiFuture<DocumentSnapshot> future = docRef.get();
 			DocumentSnapshot document = future.get();
 			if(document.exists()) {				
@@ -130,6 +129,8 @@ public class ArticleDao implements ArticleDaoInt {
 				logger.warn("Article document not found: %s".formatted(articleId));
 				return result;
 			}				
+		}catch(Exception e) {
+			throw e;
 		}
 		return result;
 	}
@@ -137,9 +138,9 @@ public class ArticleDao implements ArticleDaoInt {
 	@Override
 	public boolean updateArticle(String accountId, Article article) throws Exception {
 		var result = false;
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
-			DocumentReference docRef = db.collection(ArticleDoc.collection).document(article.articleId());
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			DocumentReference docRef = collection().document(article.articleId());
 			
 			ApiFuture<DocumentSnapshot> future = docRef.get();
 			DocumentSnapshot document = future.get();
@@ -169,6 +170,8 @@ public class ArticleDao implements ArticleDaoInt {
 			}else {
 				logger.warn("Article %s not authorized with account %s".formatted(article.articleId(),accountId));
 			}
+		}catch(Exception e) {
+			throw e;
 		}
 		return result;
 	}
@@ -176,9 +179,9 @@ public class ArticleDao implements ArticleDaoInt {
 	@Override
 	public List<CloudDocument> getArticlesForManage(String accountId) throws Exception {
 		List<CloudDocument> result = new ArrayList<CloudDocument>();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
-			Query query = db.collection(ArticleDoc.collection)
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			Query query = collection()
 					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.orderBy(ArticleDoc.field_created_at, Direction.DESCENDING);
 			
@@ -201,9 +204,9 @@ public class ArticleDao implements ArticleDaoInt {
 	@Override
 	public List<CloudDocument> getArticlesForBlog(String accountId) throws Exception {
 		List<CloudDocument> result = new ArrayList<CloudDocument>();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
-			Query query = db.collection(ArticleDoc.collection)
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			Query query = collection()
 					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH)
 					.orderBy(ArticleDoc.field_published_at, Direction.DESCENDING);
@@ -223,9 +226,9 @@ public class ArticleDao implements ArticleDaoInt {
 	@Override
 	public boolean deleteArticle(String accountId, String articleId) throws Exception {
 		var result = false;
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
-			DocumentReference accountDocRef = db.collection(AccountDoc.collection).document(accountId);
-			DocumentReference docRef = db.collection(ArticleDoc.collection).document(articleId);
+		try {
+			DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			DocumentReference docRef = collection().document(articleId);
 			
 			ApiFuture<DocumentSnapshot> future = docRef.get();
 			DocumentSnapshot document = future.get();
@@ -243,6 +246,8 @@ public class ArticleDao implements ArticleDaoInt {
 			ApiFuture<WriteResult> writeResult = docRef.delete();
 			writeResult.get();
 			result = true;
+		}catch(Exception e) {
+			throw e;
 		}
 		return result;
 	}

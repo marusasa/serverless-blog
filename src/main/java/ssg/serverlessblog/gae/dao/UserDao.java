@@ -1,11 +1,12 @@
 package ssg.serverlessblog.gae.dao;
 
+import java.io.IOException;
 import java.util.Optional;
 
 import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
 
 import ssg.serverlessblog.documentref.UserDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
@@ -20,12 +21,20 @@ import ssg.serverlessblog.util.PasswordUtil;
  */
 public class UserDao implements UserDaoInt {
 
+	private CollectionReference users = null;
+	private CollectionReference collection() throws IOException {
+		if(users == null) {
+			users = FirestoreDbUtil.getFirestoreDbObj().collection(UserDoc.collection);
+		}
+		return users;
+	}
+	
 	@Override
 	public Optional<String> login(String username, String password) throws Exception {
 		Optional<String> result = Optional.empty();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
+		try {
 			
-			ApiFuture<DocumentSnapshot> future = db.collection(UserDoc.collection).document(username).get();
+			ApiFuture<DocumentSnapshot> future = collection().document(username).get();
 			DocumentSnapshot docSnapshot = future.get();
 			if(docSnapshot.exists()) {
 				//user found.
@@ -41,6 +50,8 @@ public class UserDao implements UserDaoInt {
 					result = Optional.of(accountId);										
 				}	
 			}
+		}catch(Exception e) {
+			throw e;
 		}
 		
 		return result;

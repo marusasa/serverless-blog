@@ -57,7 +57,7 @@ function App() {
 					</div>
 					<div className="grid grid-cols-4">
 						<div className={showAboutMe? ' hidden ':'' + " col-span-4 md:col-span-3"}>							
-							<Outlet />
+							<Outlet context={[loaded, setLoaded]}/>
 						</div>
 						<div className={showAboutMe? ' col-span-4 ': ' hidden ' + "  md:col-span-1 md:block md:pl-4"}>
 							<SideContents></SideContents>

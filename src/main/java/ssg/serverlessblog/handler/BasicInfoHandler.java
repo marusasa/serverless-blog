@@ -12,6 +12,7 @@ import ssg.serverlessblog.data_json.ResultBasicInfo;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
+import ssg.serverlessblog.util.AppProperties;
 import ssg.serverlessblog.util.CloudDocument;
 
 /**
@@ -25,22 +26,31 @@ public class BasicInfoHandler implements Handler {
 	@Override
 	public void handle(@NotNull Context ctx) throws Exception {
 		ResultBasicInfo result = new ResultBasicInfo();
-		try {			
-			//Currently multi-tenant is not part of the design.
-			//However, account id is used for possible future implementation.
-			var accountId = Env.getAccountIdToUse(ctx);
-			Optional<CloudDocument> setting = Env.settingDao.getSetting(accountId);
-						
-			if(setting.isPresent()) {
-				var document = setting.get();
+		try {
+			//check to use hard coded values or not.
+			//Hard coded mode is provided to speed up page load.
+			if(AppProperties.getBoolean("basic.use-hardcoded-val")) {
 				result.setBloggerName("TBD");	//Not used yet
-				result.setTitle(document.getString(SettingDoc.field_blog_title));
-				result.setSubTitle(document.getString(SettingDoc.field_blog_subtitle));
-				result.setIconUrl(document.getString(SettingDoc.field_icon_url));
-				result.setFaviconUrl(document.getString(SettingDoc.field_favicon_url));
-				result.setResult(AppConst.RESULT_SUCCESS);
+				result.setTitle(AppProperties.getString("basic.title"));
+				result.setSubTitle(AppProperties.getString("basic.sub-title"));
+				result.setIconUrl(AppProperties.getString("basic.icon-url"));
+				result.setFaviconUrl(AppProperties.getString("basic.favicon-url"));
+				result.setResult(AppConst.RESULT_SUCCESS);				
 			}else {
-				result.getMessages().add("Setting data not found for this blog. This should not happen...");
+				var accountId = Env.getAccountIdToUse(ctx);
+				Optional<CloudDocument> setting = Env.settingDao.getSetting(accountId);
+							
+				if(setting.isPresent()) {
+					var document = setting.get();
+					result.setBloggerName("TBD");	//Not used yet
+					result.setTitle(document.getString(SettingDoc.field_blog_title));
+					result.setSubTitle(document.getString(SettingDoc.field_blog_subtitle));
+					result.setIconUrl(document.getString(SettingDoc.field_icon_url));
+					result.setFaviconUrl(document.getString(SettingDoc.field_favicon_url));
+					result.setResult(AppConst.RESULT_SUCCESS);
+				}else {
+					result.getMessages().add("Setting data not found for this blog. This should not happen...");
+				}
 			}
 		}catch(Exception e) {
 			logger.error("Error processing.",e);

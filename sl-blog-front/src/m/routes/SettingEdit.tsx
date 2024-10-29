@@ -77,6 +77,13 @@ function SettingEdit() {
 			<FormTitle text="Edit Setting"/>
 			<Loading loaded={loaded} />
 			<div className={loaded ? 'visible' : 'invisible'}>
+				<div className="card bg-base-100 w-96 w-full mb-4 bg-secondary-content">
+					<div className="card-body p-4">
+						<h2 className="card-title">Note</h2>
+						<p>When your system has "basic.use-hardcoded-val=true" in serverless-blog.properties file, 
+							the values you enter here are ignored.</p>
+					</div>
+				</div>
 				<form onSubmit={handleSave}>
 					<div className="flex">
 						<SubmitButton text="Save" inProcess={inProcess}/>

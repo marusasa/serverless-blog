@@ -38,7 +38,8 @@ public class SystemDao implements SystemDaoInt {
 	@Override
 	public int getAccountsSize() throws Exception {
 		int result = -1;
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
+		try {
+			Firestore db = FirestoreDbUtil.getFirestoreDbObj();
 			ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).limit(2).get();
 			result = q.get().size();
 		}catch(Exception e) {
@@ -52,7 +53,8 @@ public class SystemDao implements SystemDaoInt {
 	@Override
 	public String getSingleTenantAccoundId() throws Exception {
 		var accountId = "";
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
+		try {
+			Firestore db = FirestoreDbUtil.getFirestoreDbObj();
 			ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).get();
 			var list = q.get().getDocuments();
 			if(list.size() > 1) {
@@ -74,7 +76,8 @@ public class SystemDao implements SystemDaoInt {
 	public String createInitialSystemData() throws Exception {
 		var accountId = "";
 		final ObjectMapper mapper = new ObjectMapper();
-		try (Firestore db = FirestoreDbUtil.getFirestoreDbObj();){
+		try {
+			Firestore db = FirestoreDbUtil.getFirestoreDbObj();
 			DocumentReference accountDocRef = null;
 			//create account id.
 			{

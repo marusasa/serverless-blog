@@ -1,7 +1,6 @@
 package ssg.serverlessblog.gae.util;
 
 import java.io.IOException;
-import java.util.Date;
 
 import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.Firestore;
@@ -15,10 +14,15 @@ import ssg.serverlessblog.util.CloudDocument;
  */
 public class FirestoreDbUtil implements DataUtilInt {
 	
+	private static Firestore db = null;
+	
 	public static Firestore getFirestoreDbObj() throws IOException  {
-		Firestore db = FirestoreOptions.getDefaultInstance().getService();
+		if(db == null) {
+			db = FirestoreOptions.getDefaultInstance().getService();
+		}
 		return db;
 	}
+	
 
 
 	@Override
