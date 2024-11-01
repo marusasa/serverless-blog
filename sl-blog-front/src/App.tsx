@@ -55,11 +55,11 @@ function App() {
 									>{showAboutMe? 'Back to Posts':'Show About Me'}</a>
 						</div>
 					</div>
-					<div className="grid grid-cols-4">
-						<div className={showAboutMe? ' hidden ':'' + " col-span-4 md:col-span-3"}>							
+					<div className="grid grid-cols-6">
+						<div className={showAboutMe? ' hidden ':'' + " col-span-6 md:col-span-4"}>							
 							<Outlet context={[loaded, setLoaded]}/>
 						</div>
-						<div className={showAboutMe? ' col-span-4 ': ' hidden ' + "  md:col-span-1 md:block md:pl-4"}>
+						<div className={showAboutMe? ' col-span-6 ': ' hidden ' + "  md:col-span-2 md:block md:pl-4"}>
 							<SideContents></SideContents>
 						</div>
 					</div>

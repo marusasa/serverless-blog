@@ -57,7 +57,7 @@ public class BlogMain {
 												// ContextHandler.ApproveAliases())
 				// staticFiles.headers = Map.of(...); // headers that will be set for the files
 				staticFiles.skipFileFunction = req -> false; // you can use this to skip certain files in the dir, based
-																// on the HttpServletRequest
+																// on the HttpServletRequest						
 			});
 			config.jetty.modifyServletContextHandler(jettyContext ->{
 				//jettyContext.setMaxFormContentSize(2000000);	//2 Megabyte to give some buffer
@@ -179,7 +179,7 @@ public class BlogMain {
 		});
 		
 		//Make sure datastore is ready.
-		if(AppProperties.getBoolean("env.run-first-run")) {
+		if(!AppProperties.getBoolean("env.skip-first-run")) {
 			firstRun();		
 		}
 		

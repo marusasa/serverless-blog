@@ -102,6 +102,16 @@ then the application was deployed and initialized successfully.
 ```
 
 - The initialization process should have created some data. Go to '(default)' datastore to verify the data created.
+
+# How to use images on you site.
+
+1. Create a Cloud Storage bucket.
+
+2. Use following gloud commang to grant 'public access'
+
+```
+gcloud storage buckets add-iam-policy-binding gs://BUCKET_NAME --member=allUsers --role=roles/storage.objectViewer
+```
 	
 # Things to consider
 

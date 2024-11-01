@@ -1,11 +1,14 @@
+import './PostPage.css';
 import { useLoaderData, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Markdown from 'react-markdown'
 
 function PostPage() {
 	const articleRes = useLoaderData() as object;	
 	const [article, setArticle] = useState({});
 	const [pubDateYYYYMMDD, setPubDateYYYYMMDD] = useState('');
 	const [dateText, setDateText] = useState('');
+	const refArticleP = useRef(null);
 	
 	useEffect(() => {
 		try{
@@ -21,7 +24,16 @@ function PostPage() {
 			console.log(error);
 			alert('Error loading data.');
 		}
-	});
+		refArticleP.current.addEventListener('click', handleArticleClick);
+	},[]);
+	
+	const handleArticleClick = (event) => {
+		if (event.target.tagName === "A") {
+		   // Prevent the default link behavior (navigation)
+		   event.preventDefault();
+		   window.open(event.target.href,'_blank');		   
+		} 
+	};
 	
 	return (
 		<>
@@ -34,7 +46,7 @@ function PostPage() {
 							</p>
 							<h2 className="card-title">{article.title}</h2>
 							<p className="font-thin italic"><time dateTime={pubDateYYYYMMDD}>{dateText}</time></p>
-							<p className='whitespace-pre-wrap'>{article.body}</p>
+							<p className='prose max-w-none' ref={refArticleP}><Markdown className="reactMarkDown">{article.body}</Markdown></p>
 						</article>
 					</div>
 				</div>
