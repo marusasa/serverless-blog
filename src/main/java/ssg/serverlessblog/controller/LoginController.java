@@ -13,6 +13,7 @@ import ssg.serverlessblog.util.AppConst;
  */
 public class LoginController {
 
+	@SuppressWarnings("unused")
 	private static final Logger logger = LoggerFactory.getLogger(LoginController.class.getName());
 	
 	/**
@@ -23,8 +24,8 @@ public class LoginController {
 	 * @param ctx
 	 */
 	public static void checkLogin(Context ctx) {
-		ResultCheckLogin result = new ResultCheckLogin();
-		String userName = ctx.sessionAttribute(UserDoc.id_ref_name);
+		final ResultCheckLogin result = new ResultCheckLogin();
+		final String userName = ctx.sessionAttribute(UserDoc.id_ref_name);
 		if(userName != null && !userName.isBlank()) {
 			result.setResult(AppConst.RESULT_SUCCESS);
 			result.setUserName(userName);

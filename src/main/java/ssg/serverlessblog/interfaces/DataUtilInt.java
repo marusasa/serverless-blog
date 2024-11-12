@@ -1,7 +1,5 @@
 package ssg.serverlessblog.interfaces;
 
-import java.util.Date;
-
 import ssg.serverlessblog.util.CloudDocument;
 
 /**

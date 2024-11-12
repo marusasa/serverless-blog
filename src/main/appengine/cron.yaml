@@ -1,0 +1,6 @@
+cron:
+- description: "Run daily analytics process"
+  url: /scheduled/daily-process
+  schedule: every day 02:00
+  timezone: America/Los_Angeles
+

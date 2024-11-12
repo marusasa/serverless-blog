@@ -21,18 +21,16 @@ function PostsItem({article}:{article:PostType}) {
 		<>
 			<div className="card bg-white w-full mb-8 text-left shadow-lg border-solid border border-slate-200 p-4 md:p-8">
 				<div className="card-body p-0">
-					<article>
-						<h2 className="card-title">{article.title}</h2>
-						<p className="font-thin italic"><time dateTime={pubDateYYYYMMDD}>{dateText}</time></p>
-						<p className='whitespace-pre-wrap line-clamp-4 mb-3'>{article.body}</p>
-						<p>
-							<Link  to={"/post/" + link} className="link link-accent mr-5">Read More...</Link >
-							<a className={article.summary == "" || article.summary == null? 
-								'invisible':'visible' + " link link-accent"}
-								onClick={handleShowSummary}
-								>Show AI Summary</a>
-						</p>
-					</article>
+					<h2 className="card-title">{article.title}</h2>
+					<p className="font-thin italic"><time dateTime={pubDateYYYYMMDD}>{dateText}</time></p>
+					<p className='whitespace-pre-wrap line-clamp-4 mb-3'>{article.body}</p>
+					<p>
+						<Link  to={"/post/" + link} className="link link-accent mr-5">Read More...</Link >
+						<a className={article.summary == "" || article.summary == null? 
+							'invisible':'visible' + " link link-accent"}
+							onClick={handleShowSummary}
+						>Show AI Summary</a>
+					</p>
 				</div>
 			</div>
 			<dialog id="my_modal_1" className="modal" ref={dialogRef}>

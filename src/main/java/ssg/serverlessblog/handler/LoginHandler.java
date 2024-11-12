@@ -24,10 +24,10 @@ public class LoginHandler implements Handler {
 
 	@Override
 	public void handle(@NotNull Context ctx) throws Exception {
-		ResultBase result = new ResultBase();
+		final ResultBase result = new ResultBase();
 		try{
-			LoginForm login = ctx.bodyAsClass(LoginForm.class);			
-			Optional<String> opOfAccountId = Env.userDao.login(login.username(), login.password());
+			final LoginForm login = ctx.bodyAsClass(LoginForm.class);			
+			final Optional<String> opOfAccountId = Env.userDao.login(login.username(), login.password());
 			
 			if(opOfAccountId.isPresent()){
 				//put user name in the session.

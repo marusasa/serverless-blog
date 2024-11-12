@@ -27,11 +27,11 @@ public class FirestoreDbUtil implements DataUtilInt {
 
 	@Override
 	public String getUtcString(CloudDocument doc, String fieldId) {
-		Timestamp ts = (Timestamp)doc.get(fieldId);
+		final Timestamp ts = (Timestamp)doc.get(fieldId);
 		//toString() produces '2024-10-25T04:36:17.743000000Z', change this to
 		//'2024-10-25T04:36:17.743Z', which is UTC timezone compatible
 		//in Javascript.
-		var result = ts.toString().substring(0, 23) + "Z";
+		final var result = ts.toString().substring(0, 23) + "Z";
 		return result;
 	}
 	

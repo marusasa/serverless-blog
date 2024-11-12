@@ -17,8 +17,7 @@ const router = createBrowserRouter([
 		},
 		{
 			path: 'post/:postId',
-			element: <PostPage/>,
-			loader:postLoader
+			element: <PostPage/>
 		}
 	]
   }

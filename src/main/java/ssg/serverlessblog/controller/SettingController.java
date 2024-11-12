@@ -24,13 +24,13 @@ public class SettingController {
 	private static final Logger logger = LoggerFactory.getLogger(SettingController.class.getName());
 	
 	public static void get(Context ctx) {
-		ResultSetting result = new ResultSetting();
+		final ResultSetting result = new ResultSetting();
 		try {
-			String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-			Optional<CloudDocument> op = Env.settingDao.getSetting(accountId);
+			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+			final Optional<CloudDocument> op = Env.settingDao.getSetting(accountId);
 			if(op.isPresent()) {
-				CloudDocument doc = op.get();
-				var s = new Setting.Builder()
+				final CloudDocument doc = op.get();
+				final var s = new Setting.Builder()
 						.blogTitle(doc.getString(SettingDoc.field_blog_title))
 						.blogSubTitle(doc.getString(SettingDoc.field_blog_subtitle))
 						.settingId(doc.getId())
@@ -48,10 +48,10 @@ public class SettingController {
     }
 	
 	public static void update(Context ctx) {
-		ResultBase result = new ResultBase();
+		final ResultBase result = new ResultBase();
 		try {
-			Setting setting = ctx.bodyAsClass(Setting.class);			
-			String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);			
+			final Setting setting = ctx.bodyAsClass(Setting.class);			
+			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);			
 			
 			Env.settingDao.updateSetting(accountId, setting);
 			result.setResult(AppConst.RESULT_SUCCESS);

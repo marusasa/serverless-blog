@@ -39,8 +39,8 @@ public class SystemDao implements SystemDaoInt {
 	public int getAccountsSize() throws Exception {
 		int result = -1;
 		try {
-			Firestore db = FirestoreDbUtil.getFirestoreDbObj();
-			ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).limit(2).get();
+			final Firestore db = FirestoreDbUtil.getFirestoreDbObj();
+			final ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).limit(2).get();
 			result = q.get().size();
 		}catch(Exception e) {
 			throw e;
@@ -54,9 +54,9 @@ public class SystemDao implements SystemDaoInt {
 	public String getSingleTenantAccoundId() throws Exception {
 		var accountId = "";
 		try {
-			Firestore db = FirestoreDbUtil.getFirestoreDbObj();
-			ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).get();
-			var list = q.get().getDocuments();
+			final Firestore db = FirestoreDbUtil.getFirestoreDbObj();
+			final ApiFuture<QuerySnapshot> q = db.collection(AccountDoc.collection).get();
+			final var list = q.get().getDocuments();
 			if(list.size() > 1) {
 				throw new Exception("More than one account record found. This shouldn't happen.");
 			}else if(list.size() == 0) {
@@ -77,14 +77,14 @@ public class SystemDao implements SystemDaoInt {
 		var accountId = "";
 		final ObjectMapper mapper = new ObjectMapper();
 		try {
-			Firestore db = FirestoreDbUtil.getFirestoreDbObj();
+			final Firestore db = FirestoreDbUtil.getFirestoreDbObj();
 			DocumentReference accountDocRef = null;
 			//create account id.
 			{
-				Map<String, Object> data = new HashMap<>();
+				final Map<String, Object> data = new HashMap<>();
 				data.put(AccountDoc.field_name,"default account");
 				data.put(AccountDoc.field_created_at, Timestamp.now());
-				ApiFuture<DocumentReference> docRef = db.collection(AccountDoc.collection).add(data);
+				final ApiFuture<DocumentReference> docRef = db.collection(AccountDoc.collection).add(data);
 				accountDocRef = docRef.get();
 				logger.info("Account data created.");
 				accountId = accountDocRef.getId();
@@ -92,25 +92,25 @@ public class SystemDao implements SystemDaoInt {
 			//create user data.
 			var pass = "";
 			{
-				Map<String, Object> data = new HashMap<>();
+				final Map<String, Object> data = new HashMap<>();
 				data.put(UserDoc.field_ref_account_id, accountDocRef);
-				Optional<String> salt = PasswordUtil.generateSalt(30);
+				final Optional<String> salt = PasswordUtil.generateSalt(30);
 				
 				//generate password
 				pass = "blogPass_" + PasswordUtil.generateSalt(5).get();
 				
-				Optional<String> password = PasswordUtil.hashPassword(pass,salt.get());
+				final Optional<String> password = PasswordUtil.hashPassword(pass,salt.get());
 				data.put(UserDoc.field_salt, salt.get());
 				data.put(UserDoc.field_password, password.get());
 				data.put(UserDoc.field_created_at, Timestamp.now());
 				data.put(UserDoc.field_updated_at, Timestamp.now());
-				ApiFuture<WriteResult> future = db.collection(UserDoc.collection).document("admin").set(data);
+				final ApiFuture<WriteResult> future = db.collection(UserDoc.collection).document("admin").set(data);
 				future.get();
 				logger.info("User data created.");
 			}
 			//Create setting data.
 			{
-				Map<String, Object> data = new HashMap<>();
+				final Map<String, Object> data = new HashMap<>();
 				data.put(SettingDoc.field_ref_account_id, accountDocRef);
 				data.put(SettingDoc.field_blog_title, "My Blog");
 				data.put(SettingDoc.field_blog_subtitle, "Subtitle goes here");
@@ -120,7 +120,7 @@ public class SystemDao implements SystemDaoInt {
 				data.put(SettingDoc.field_updated_at, null);
 				data.put(SettingDoc.field_gae_ai_project_id, "");
 				data.put(SettingDoc.field_gae_ai_location, "");
-				ApiFuture<DocumentReference> docRef = db.collection(SettingDoc.collection).add(data);
+				final ApiFuture<DocumentReference> docRef = db.collection(SettingDoc.collection).add(data);
 				docRef.get();
 				logger.info("Setting data created.");
 			}

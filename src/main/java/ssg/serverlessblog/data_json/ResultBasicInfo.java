@@ -7,8 +7,15 @@ public class ResultBasicInfo extends ResultBase{
 	private String apiUrl = "";
 	private String iconUrl = "";
 	private String faviconUrl = "";
+	private int visitorId = 0;
 	
 	
+	public int getVisitorId() {
+		return visitorId;
+	}
+	public void setVisitorId(int visitorId) {
+		this.visitorId = visitorId;
+	}
 	public String getFaviconUrl() {
 		return faviconUrl;
 	}

@@ -51,20 +51,20 @@ public class FirestoreDataStore implements SessionDataStore {
 	public SessionData load(String id) throws Exception {
 		final SessionData d = new SessionData(id, "", "", 0, 0, 0,0);
 		
-		DocumentReference docRef = sessions.document(id);
-		ApiFuture<DocumentSnapshot> future = docRef.get();
-		DocumentSnapshot document = future.get();
+		final DocumentReference docRef = sessions.document(id);
+		final ApiFuture<DocumentSnapshot> future = docRef.get();
+		final DocumentSnapshot document = future.get();
 		if(!document.exists()) {
 			return null;
 		}
-		Map<String,Object> data =  document.getData();
+		final Map<String,Object> data =  document.getData();
 		data.forEach((k,v) -> {
 			d.setAttribute(k, v);
 		});
 		
-		Map<String, Object> updates = new HashMap<>();
+		final Map<String, Object> updates = new HashMap<>();
         updates.put(SessionDoc.field_accessed_at, Timestamp.now());
-        ApiFuture<WriteResult> writeResult = docRef.update(updates);
+        final ApiFuture<WriteResult> writeResult = docRef.update(updates);
         writeResult.get();
         
 		return d;
@@ -72,35 +72,35 @@ public class FirestoreDataStore implements SessionDataStore {
 
 	@Override
 	public void store(String id, SessionData sd) throws Exception {
-		DocumentReference docRef = sessions.document(id);
-		ApiFuture<DocumentSnapshot> future = docRef.get();
-		DocumentSnapshot document = future.get();
+		final DocumentReference docRef = sessions.document(id);
+		final ApiFuture<DocumentSnapshot> future = docRef.get();
+		final DocumentSnapshot document = future.get();
 		if(!document.exists()) {
 			return;
 		}
 		
-		Map<String, Object> updates = new HashMap<>();
+		final Map<String, Object> updates = new HashMap<>();
 		
 		sd.getAllAttributes().forEach((k,v) -> {
 			updates.put(k, v);
 		});
 		
 		updates.put(SessionDoc.field_updated_at, Timestamp.now());
-		ApiFuture<WriteResult> writeResult = docRef.update(updates);
+		final ApiFuture<WriteResult> writeResult = docRef.update(updates);
         writeResult.get();		
 	}
 
 	@Override
 	public boolean delete(String id) throws Exception {
 		
-		DocumentReference docRef = sessions.document(id);
-		ApiFuture<DocumentSnapshot> future = docRef.get();
-		DocumentSnapshot document = future.get();
+		final DocumentReference docRef = sessions.document(id);
+		final ApiFuture<DocumentSnapshot> future = docRef.get();
+		final DocumentSnapshot document = future.get();
 		if(!document.exists()) {
 			return false;
 		}
 		
-		ApiFuture<WriteResult> writeResult = docRef.delete();
+		final ApiFuture<WriteResult> writeResult = docRef.delete();
         writeResult.get();        
 		return true;
 	}
@@ -159,11 +159,11 @@ public class FirestoreDataStore implements SessionDataStore {
 	@Override
 	public SessionData newSessionData(String id, long created, long accessed, long lastAccessed, long maxInactiveMs) {
 		SessionData d = new SessionData(id, "", "", created, accessed, lastAccessed, maxInactiveMs);
-		Map<String, Object> data = new HashMap<>();
+		final Map<String, Object> data = new HashMap<>();
 		data.put(SessionDoc.field_created_at, Timestamp.now());
 		data.put(SessionDoc.field_updated_at, null);
 		data.put(SessionDoc.field_accessed_at, null);
-		ApiFuture<WriteResult> writeResult = sessions.document(id).set(data);
+		final ApiFuture<WriteResult> writeResult = sessions.document(id).set(data);
 		
 		try {
 			writeResult.get();
@@ -189,9 +189,9 @@ public class FirestoreDataStore implements SessionDataStore {
 
 	@Override
 	public boolean exists(String id) throws Exception {
-		DocumentReference docRef = sessions.document(id);
-		ApiFuture<DocumentSnapshot> future = docRef.get();
-		DocumentSnapshot document = future.get();
+		final DocumentReference docRef = sessions.document(id);
+		final ApiFuture<DocumentSnapshot> future = docRef.get();
+		final DocumentSnapshot document = future.get();
 		if(document.exists()) {
 			return true;
 		}else {

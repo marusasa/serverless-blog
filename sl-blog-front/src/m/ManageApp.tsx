@@ -53,9 +53,13 @@ function ManageApp() {
 						<div className="drawer-side">
 							<label htmlFor="my-drawer-2" aria-label="close sidebar" className="drawer-overlay"></label>
 							<ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
-								<li><Link to="/m/posts">Manage Posts</Link></li>
-								<li><Link to="/m/components">Manage Page Components</Link></li>
+								<li><Link to="/m/posts">Posts</Link></li>
+								<li><Link to="/m/components">Page Components</Link></li>
 								<li><Link to="/m/setting">Setting</Link></li>
+								<li className='pl-4'>------------</li>
+								<li><Link to="/m/analytics/daily-visits">Daily Visits</Link></li>
+								<li><Link to="/m/analytics/page-engagement">Page Engagement</Link></li>
+								<li className='pl-4'>------------</li>								
 								<li><a href="/">Show Blog</a></li>
 							</ul>
 						</div>

@@ -43,4 +43,12 @@ public class CloudDocument {
 	public Boolean getBoolean(String key) {
 		return (Boolean)data.get(key);
 	}
+	
+	public boolean isNull(String key) {
+		if(data.get(key) == null) {
+			return true;
+		}else {
+			return false;
+		}
+	}
 }

@@ -1,31 +1,39 @@
 import './PostPage.css';
-import { useLoaderData, Link } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import Markdown from 'react-markdown'
+import Loading from "../m/components/Loading";
 
 function PostPage() {
-	const articleRes = useLoaderData() as object;	
+	const params = useParams();
 	const [article, setArticle] = useState({});
 	const [pubDateYYYYMMDD, setPubDateYYYYMMDD] = useState('');
 	const [dateText, setDateText] = useState('');
 	const refArticleP = useRef(null);
+	const [loaded, setLoaded] = useState(false);
 	
 	useEffect(() => {
-		try{
-			if (articleRes.result == 'success') {
-				setArticle(articleRes.article);
-				setPubDateYYYYMMDD(articleRes.article.publishedAt.substring(0, 10));
-				const pubDate = new Date(articleRes.article.publishedAt);
-				setDateText(pubDate.toLocaleDateString());
-			} else {
-				alert('Post not loaded.');
-			}
-		}catch(error){
-			console.log(error);
-			alert('Error loading data.');
-		}
-		refArticleP.current.addEventListener('click', handleArticleClick);
-	},[]);
+		fetch('/articles/' + params.postId)
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.result == 'success') {
+					setArticle(data.article);
+					setPubDateYYYYMMDD(data.article.publishedAt.substring(0, 10));
+					const pubDate = new Date(data.article.publishedAt);
+					setDateText(pubDate.toLocaleDateString());
+					setLoaded(true);
+				} else {
+					alert('Post not loaded...');
+				}
+			})
+			.catch((err) => {
+				console.log(err.message);
+				alert('Failed to load article.');
+			})
+			.finally(() => {
+				refArticleP.current.addEventListener('click', handleArticleClick);
+			});
+	}, []);
 	
 	const handleArticleClick = (event) => {
 		if (event.target.tagName === "A") {
@@ -40,7 +48,8 @@ function PostPage() {
 			<div className="py-4">
 				<div className="card bg-white w-full mb-8 text-left shadow-lg border-solid border border-slate-200 p-4 md:p-8">
 					<div className="card-body p-0">
-						<article>
+						<Loading loaded={loaded}/>
+						<article className={loaded ? 'visible' : 'invisible'}>
 							<p>
 								<Link  to="/" className="link link-accent">Blog Top</Link >
 							</p>
@@ -56,8 +65,3 @@ function PostPage() {
 
 }
 export default PostPage
-
-export async function loader({ params }:{params:object}) {
-	const articleId: string = params.postId;
-	return fetch('/articles/' + articleId);
-}

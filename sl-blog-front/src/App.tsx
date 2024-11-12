@@ -3,7 +3,8 @@ import BlogTop from './components/BlogTop.tsx'
 import SideContents from './components/SideContents.tsx'
 import { useEffect, useState } from 'react';
 import Loading from "./m/components/Loading";
-import { Outlet } from "react-router-dom";
+import { Outlet   } from "react-router-dom";
+import AnalyticUtil from "./util/AnalyticUtil";
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
 	const [loaded, setLoaded] = useState(false);
 	const [showAboutMe, setShowAboutMe] = useState(false);
 	const [iconUrl, setIconUrl] = useState('');
+	const [visitorId, setVisitorId] = useState(0);
 	
 	useEffect(() => {
 		fetch('/basic-info')
@@ -26,6 +28,8 @@ function App() {
 					if(data.faviconUrl != ""){
 						addFavicon(data.faviconUrl);
 					}
+					setVisitorId(data.visitorId);
+					AnalyticUtil.init(data.visitorId);
 				} else {
 					alert(JSON.stringify(data.messages));
 				}
@@ -35,8 +39,9 @@ function App() {
 				console.log(err.message);
 				alert('Failed to load articles.');
 			});
+			
 	}, []);
-
+	
 	const toggleShowAboutMe = (e: React.MouseEvent<HTMLAnchorElement> ) => {
 		   e.preventDefault();
 		   setShowAboutMe(!showAboutMe);

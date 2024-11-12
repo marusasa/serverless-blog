@@ -1,5 +1,6 @@
 package ssg.serverlessblog.handler;
 
+import java.util.Calendar;
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ public class BasicInfoHandler implements Handler {
 
 	@Override
 	public void handle(@NotNull Context ctx) throws Exception {
-		ResultBasicInfo result = new ResultBasicInfo();
+		final ResultBasicInfo result = new ResultBasicInfo();
 		try {
 			//check to use hard coded values or not.
 			//Hard coded mode is provided to speed up page load.
@@ -37,11 +38,11 @@ public class BasicInfoHandler implements Handler {
 				result.setFaviconUrl(AppProperties.getString("basic.favicon-url"));
 				result.setResult(AppConst.RESULT_SUCCESS);				
 			}else {
-				var accountId = Env.getAccountIdToUse(ctx);
-				Optional<CloudDocument> setting = Env.settingDao.getSetting(accountId);
+				final var accountId = Env.getAccountIdToUse(ctx);
+				final Optional<CloudDocument> setting = Env.settingDao.getSetting(accountId);
 							
 				if(setting.isPresent()) {
-					var document = setting.get();
+					final var document = setting.get();
 					result.setBloggerName("TBD");	//Not used yet
 					result.setTitle(document.getString(SettingDoc.field_blog_title));
 					result.setSubTitle(document.getString(SettingDoc.field_blog_subtitle));
@@ -52,6 +53,12 @@ public class BasicInfoHandler implements Handler {
 					result.getMessages().add("Setting data not found for this blog. This should not happen...");
 				}
 			}
+			//Add unique visitor id for analytics purpose.
+			final var c = Calendar.getInstance();
+			//ip address + user agent + today's date.
+			final var visitor = ctx.req().getRemoteAddr() + ctx.userAgent() + c.get(Calendar.YEAR) + (c.get(Calendar.MONTH) + 1) + "-"
+					+ c.get(Calendar.DATE);
+			result.setVisitorId(visitor.hashCode());
 		}catch(Exception e) {
 			logger.error("Error processing.",e);
 			result.getMessages().add("Error getting basic information");

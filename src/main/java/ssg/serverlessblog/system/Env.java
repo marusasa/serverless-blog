@@ -1,6 +1,5 @@
 package ssg.serverlessblog.system;
 
-import java.util.Date;
 import java.util.Optional;
 
 import org.eclipse.jetty.server.session.SessionDataStore;
@@ -8,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
+import ssg.serverlessblog.interfaces.AnalyticsDaoInt;
 import ssg.serverlessblog.interfaces.ArticleDaoInt;
 import ssg.serverlessblog.interfaces.DataUtilInt;
 import ssg.serverlessblog.interfaces.PageComponentDaoInt;
@@ -38,6 +38,7 @@ public class Env {
 	static public PageComponentDaoInt pageComponentDao = null;
 	static public DataUtilInt dataUtil = null;
 	static public SessionDataStore noSqlSessionDataStore = null;
+	static public AnalyticsDaoInt analyticsDao = null;
 	
 	static {
 		try {
@@ -50,6 +51,7 @@ public class Env {
 				systemDao =  (SystemDaoInt)getClassObject("ssg.serverlessblog.gae.dao.SystemDao");
 				dataUtil = (DataUtilInt)getClassObject("ssg.serverlessblog.gae.util.FirestoreDbUtil");
 				noSqlSessionDataStore = (SessionDataStore)getClassObject("ssg.serverlessblog.gae.util.FirestoreDataStore");
+				analyticsDao = (AnalyticsDaoInt)getClassObject("ssg.serverlessblog.gae.dao.AnalyticsDao");
 			}
 		}catch(Exception e) {
 			logger.error("Error loading environment classes.",e);
@@ -61,8 +63,8 @@ public class Env {
 	}
 	
 	private static Object getClassObject(String className) throws Exception{
-		Class<?> clazz = Class.forName(className);
-        Object instance = clazz.getDeclaredConstructor().newInstance();
+		final Class<?> clazz = Class.forName(className);
+		final Object instance = clazz.getDeclaredConstructor().newInstance();
         return instance;
 	}
 		

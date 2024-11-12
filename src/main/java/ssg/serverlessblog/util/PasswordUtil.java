@@ -26,23 +26,23 @@ public class PasswordUtil {
 			return Optional.empty();
 		}
 
-		byte[] salt = new byte[length];
+		final byte[] salt = new byte[length];
 		RAND.nextBytes(salt);
 
 		return Optional.of(Base64.getEncoder().encodeToString(salt));
 	}
 
 	public static Optional<String> hashPassword(String password,String salt){
-		char[] chars = password.toCharArray();
-		byte[] bytes = salt.getBytes();
+		final char[] chars = password.toCharArray();
+		final byte[] bytes = salt.getBytes();
 
-		PBEKeySpec spec = new PBEKeySpec(chars, bytes, ITERATIONS, KEY_LENGTH);
+		final PBEKeySpec spec = new PBEKeySpec(chars, bytes, ITERATIONS, KEY_LENGTH);
 
 		Arrays.fill(chars, Character.MIN_VALUE);
 
 		try {
-			SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
-			byte[] securePassword = fac.generateSecret(spec).getEncoded();
+			final SecretKeyFactory fac = SecretKeyFactory.getInstance(ALGORITHM);
+			final byte[] securePassword = fac.generateSecret(spec).getEncoded();
 			return Optional.of(Base64.getEncoder().encodeToString(securePassword));
 
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException ex) {

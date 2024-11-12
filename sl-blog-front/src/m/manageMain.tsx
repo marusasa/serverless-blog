@@ -7,6 +7,8 @@ import PostList from './routes/PostList';
 import SettingEdit from './routes/SettingEdit';
 import PageCompList from './routes/PageCompList';
 import PageCompEdit from './routes/PageCompEdit';
+import AnalyticsDailyVisits from './routes/AnalyticsDailyVisits';
+import AnalyticsPageEngagement from './routes/AnalyticsPageEngagement';
 
 import ManageApp from './ManageApp.tsx'
 import LoginApp from './LoginApp.tsx'
@@ -25,6 +27,8 @@ createRoot(document.getElementById('root')!).render(
 				<Route path="setting" element={<SettingEdit />} />
 				<Route path="components" element={<PageCompList />} />
 				<Route path="components/edit" element={<PageCompEdit />} />
+				<Route path="analytics/daily-visits" element={<AnalyticsDailyVisits/>} />
+				<Route path="analytics/page-engagement" element={<AnalyticsPageEngagement/>} />				
 			</Route>
 			<Route path="login" element={<LoginApp />} >
 				<Route path="login" element={<Login />} />

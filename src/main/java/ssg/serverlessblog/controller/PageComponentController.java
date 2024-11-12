@@ -35,10 +35,10 @@ public class PageComponentController {
 	private static final ObjectMapper mapper = new ObjectMapper();
 	
 	public static void deleteItem(Context ctx) {
-		ResultBase result = new ResultBase();
+		final ResultBase result = new ResultBase();
 		try {
 			final String pageComponentId = ctx.pathParam("pageComponentId");
-			String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			
 			if(Env.pageComponentDao.deletePageComponent(accountId, pageComponentId)) {
 				result.setResult(AppConst.RESULT_SUCCESS);
@@ -54,15 +54,15 @@ public class PageComponentController {
 	}
 	
 	public static void getItem(Context ctx) {
-		ResultPageComponent result = new ResultPageComponent();
+		final ResultPageComponent result = new ResultPageComponent();
 		try {
 			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			final String pageComponentId = ctx.pathParam("pageComponentId");
-			Optional<CloudDocument> data = Env.pageComponentDao.getPageComponent(accountId, pageComponentId);
+			final Optional<CloudDocument> data = Env.pageComponentDao.getPageComponent(accountId, pageComponentId);
 			
 			if(data.isPresent()) {
-				CloudDocument document = data.get();
-				var pc = new PageComponent.Builder()
+				final CloudDocument document = data.get();
+				final var pc = new PageComponent.Builder()
 						.type(document.getString(PageComponentDoc.field_comp_type))
 						.json(document.getString(PageComponentDoc.field_json))
 						.order(document.getLong(PageComponentDoc.field_view_order))
@@ -80,13 +80,13 @@ public class PageComponentController {
 	}
 	
 	public static void getList(Context ctx) {
-		ResultPageComponentList result = new ResultPageComponentList();
+		final ResultPageComponentList result = new ResultPageComponentList();
 		try {
-			String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-			List<CloudDocument> list = Env.pageComponentDao.getPageComponents(accountId);
+			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents(accountId);
 			
 			list.forEach(document -> {
-				var pc = new PageComponent.Builder()
+				final var pc = new PageComponent.Builder()
 						.type(document.getString(PageComponentDoc.field_comp_type))
 						.json(document.getString(PageComponentDoc.field_json))
 						.order(document.getLong(PageComponentDoc.field_view_order))
@@ -104,9 +104,9 @@ public class PageComponentController {
 	}
 	
 	public static void updateProfilePic(Context ctx) {
-		ResultBase result = new ResultBase();
-		String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-		ReqPCProfilePic req = ctx.bodyAsClass(ReqPCProfilePic.class);
+		final ResultBase result = new ResultBase();
+		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+		final ReqPCProfilePic req = ctx.bodyAsClass(ReqPCProfilePic.class);
 		final String pageComponentId = ctx.pathParam("pageComponentId");
 		
 		//validation
@@ -132,9 +132,9 @@ public class PageComponentController {
     }
 	
 	public static void createNewDefault(Context ctx) {
-		ResultBase result = new ResultBase();
-		String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-		ReqPCNew req = ctx.bodyAsClass(ReqPCNew.class);
+		final ResultBase result = new ResultBase();
+		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+		final ReqPCNew req = ctx.bodyAsClass(ReqPCNew.class);
 		
 		try {
 			switch(req.type()) {
@@ -167,9 +167,9 @@ public class PageComponentController {
 	}
 		
 	public static void updateLinkList(Context ctx) {
-		ResultBase result = new ResultBase();
-		String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-		ReqPCLinkList req = ctx.bodyAsClass(ReqPCLinkList.class);	
+		final ResultBase result = new ResultBase();
+		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+		final ReqPCLinkList req = ctx.bodyAsClass(ReqPCLinkList.class);	
 		final String pageComponentId = ctx.pathParam("pageComponentId");
 		
 		//validation
@@ -194,9 +194,9 @@ public class PageComponentController {
 	
 	
 	public static void updateTextBox(Context ctx) {
-		ResultBase result = new ResultBase();
-		String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-		ReqPCTextBox req = ctx.bodyAsClass(ReqPCTextBox.class);	
+		final ResultBase result = new ResultBase();
+		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
+		final ReqPCTextBox req = ctx.bodyAsClass(ReqPCTextBox.class);	
 		final String pageComponentId = ctx.pathParam("pageComponentId");
 		
 		//validation

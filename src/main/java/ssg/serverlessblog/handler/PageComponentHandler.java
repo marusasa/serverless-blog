@@ -25,16 +25,16 @@ public class PageComponentHandler implements Handler {
 
 	@Override
 	public void handle(@NotNull Context ctx) throws Exception {
-		ResultPageComponentList result = new ResultPageComponentList();
+		final ResultPageComponentList result = new ResultPageComponentList();
 		try {
 			//Currently multi-tenant is not part of the design.
 			//However, account id is used for possible future implementation.
-			String accountId = Env.getAccountIdToUse(ctx);
-			List<CloudDocument> list = Env.pageComponentDao.getPageComponents(accountId);
+			final String accountId = Env.getAccountIdToUse(ctx);
+			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents(accountId);
 			
 			list.forEach(document -> {
 				if(document.getBoolean(PageComponentDoc.field_enabled)) {
-					var pc = new PageComponent.Builder()
+					final var pc = new PageComponent.Builder()
 							.type(document.getString(PageComponentDoc.field_comp_type))
 							.json(document.getString(PageComponentDoc.field_json))
 							.order(document.getLong(PageComponentDoc.field_view_order))

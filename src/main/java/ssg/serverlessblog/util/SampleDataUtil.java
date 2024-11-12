@@ -14,7 +14,7 @@ import ssg.serverlessblog.data_json.PCTextBox;
 public class SampleDataUtil {
 
 	public static Article getSampleArticle(String password) {
-		var a = new Article.Builder()
+		final var a = new Article.Builder()
 				.title("Your blog is up and running!")
 				.body(
 					"""
@@ -33,7 +33,7 @@ public class SampleDataUtil {
 	}
 	
 	public static PCProfilePic getSampleProfilePic() {	
-		var pp = new PCProfilePic(
+		final var pp = new PCProfilePic(
 				"https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
 				6);
 		return pp;
@@ -41,7 +41,7 @@ public class SampleDataUtil {
 	
 	//Link List
 	public static PCLinkList getSampleLinkList() {
-		var ll = new PCLinkList("My Links", new ArrayList<LinkItem>());
+		final var ll = new PCLinkList("My Links", new ArrayList<LinkItem>());
 		ll.items().add(new LinkItem("My Github Projects","https://github.com/marusasa?tab=repositories",
 				"My open source projects."));
 		ll.items().add(new LinkItem("Serverless Blog Project","https://github.com/marusasa/serverless-blog",
