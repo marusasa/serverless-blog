@@ -14,7 +14,8 @@ function PageCompEdit() {
 	const [order, setOrder] = useState(0); // Set initial value
 	const [enabled, setEnabled] = useState(false);
 	const [loaded, setLoaded] = useState(false);
-	const [inProcess,setInProcess] = useState(false);
+	const [inSave,setInSave] = useState(false);
+	const [inDelete,setInDelete] = useState(false);
 	
 	useEffect(() => {
 			fetch('/mng/components/' + pageComponentId)
@@ -84,7 +85,7 @@ function PageCompEdit() {
 					console.log(err.message);
 				})
 				.finally(() => {
-					setInProcess(false);
+					setInSave(false);
 				});
 		} catch (error) {
 			alert(error);
@@ -111,13 +112,13 @@ function PageCompEdit() {
 			         console.log(err.message);
 			      })
 				 .finally(() => {
-					setInProcess(false);
+					setInDelete(false);
 				 });
 			};
 	
 	const handleSave = (e: React.FormEvent) => {
 	   e.preventDefault();
-	   setInProcess(true);
+	   setInSave(true);
 	   updateComponent(json,order,enabled);
 	};    
 	const handleCancel = () => {
@@ -126,6 +127,7 @@ function PageCompEdit() {
 	const handleDelete = (e: React.FormEvent) => {
 		e.preventDefault();
 		if(confirm('Delete record?')){
+			setInDelete(true);
 			deleteComp();
 		}
 	};
@@ -134,11 +136,11 @@ function PageCompEdit() {
 			<FormTitle text="Edit Component"/>
 			<Loading loaded={loaded}/>
 			<div className={loaded ? 'visible' : 'invisible'}>
-				<form onSubmit={handleSave}>
+				<form>
 					<div className="flex">
-						<SubmitButton text="Save" inProcess={inProcess}/>
-						<button className="btn btn-sm btn-accent mr-3" onClick={handleDelete}>Delete</button>	
-						<button className="btn btn-sm" onClick={handleCancel}>Cancel</button>
+						<SubmitButton text="Save" inProcess={inSave} callback={handleSave} classes="btn-sm btn-primary"/>
+						<SubmitButton text="Delete" inProcess={inDelete} callback={handleDelete} classes="btn-sm btn-accent"/>
+						<button className="btn btn-sm" onClick={handleCancel}>Back</button>
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">

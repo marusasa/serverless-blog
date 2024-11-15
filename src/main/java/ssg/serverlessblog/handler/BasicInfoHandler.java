@@ -12,6 +12,7 @@ import io.javalin.http.Handler;
 import ssg.serverlessblog.data_json.ResultBasicInfo;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.system.Env;
+import ssg.serverlessblog.util.AnalyticsUtil;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.AppProperties;
 import ssg.serverlessblog.util.CloudDocument;
@@ -53,12 +54,7 @@ public class BasicInfoHandler implements Handler {
 					result.getMessages().add("Setting data not found for this blog. This should not happen...");
 				}
 			}
-			//Add unique visitor id for analytics purpose.
-			final var c = Calendar.getInstance();
-			//ip address + user agent + today's date.
-			final var visitor = ctx.req().getRemoteAddr() + ctx.userAgent() + c.get(Calendar.YEAR) + (c.get(Calendar.MONTH) + 1) + "-"
-					+ c.get(Calendar.DATE);
-			result.setVisitorId(visitor.hashCode());
+			result.setVisitorId(AnalyticsUtil.getVisitorId(ctx));
 		}catch(Exception e) {
 			logger.error("Error processing.",e);
 			result.getMessages().add("Error getting basic information");

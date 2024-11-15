@@ -32,6 +32,7 @@ import ssg.serverlessblog.documentref.UserDoc;
 import ssg.serverlessblog.handler.AnalyticsHandler;
 import ssg.serverlessblog.handler.ArticleGet;
 import ssg.serverlessblog.handler.ArticleGetList;
+import ssg.serverlessblog.handler.ArticleLikeUpdate;
 import ssg.serverlessblog.handler.BasicInfoHandler;
 import ssg.serverlessblog.handler.LoginHandler;
 import ssg.serverlessblog.handler.PageComponentHandler;
@@ -146,6 +147,7 @@ public class BlogMain {
 		app.get("/basic-info", new BasicInfoHandler());		
 		app.get("/articles", new ArticleGetList());
 		app.get("/articles/{articleId}", new ArticleGet());
+		app.patch("/articles/{articleId}/like", new ArticleLikeUpdate());
 		app.post("/login", new LoginHandler());
 		app.get("/components", new PageComponentHandler());
 		app.post("/analytics", new AnalyticsHandler());

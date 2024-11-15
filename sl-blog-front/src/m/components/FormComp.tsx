@@ -1,5 +1,4 @@
 
-
 export function FormTitle({text}:{text:string}) {
 		
 	return (
@@ -7,10 +6,12 @@ export function FormTitle({text}:{text:string}) {
 	)
 }
 
-export function SubmitButton({text, inProcess}:{text:string, inProcess:boolean}) {
-		
+export function SubmitButton({text, inProcess, callback, classes}:{text:string, 
+		inProcess:boolean, callback: (e: React.FormEvent) => void, classes:string}) {
+	
+	
 	return (
-		<button className={(inProcess?'btn-disabled':'') + " btn btn-primary mr-3 btn-sm"} type="submit">
+		<button className={(inProcess?'btn-disabled ':' ') + classes +" mr-3 btn"} onClick={callback}>
 		  <span className={(inProcess? '':'hidden ') + " loading loading-spinner"}></span>
 		  {text}
 		</button>

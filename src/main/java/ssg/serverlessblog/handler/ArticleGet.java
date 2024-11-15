@@ -11,6 +11,7 @@ import io.javalin.http.Handler;
 import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.data_json.ResultArticle;
 import ssg.serverlessblog.documentref.ArticleDoc;
+import ssg.serverlessblog.documentref.ArticleLikeDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
@@ -42,6 +43,7 @@ public class ArticleGet implements Handler {
 						.articleId(document.getId())
 						.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
 						.publishedAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
+						.likes(document.getLong(ArticleLikeDoc.field_like_count))//likes
 						.build();
 				result.setArticle(article);
 				result.setResult(AppConst.RESULT_SUCCESS);

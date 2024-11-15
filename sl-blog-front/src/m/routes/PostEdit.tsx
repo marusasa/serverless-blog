@@ -13,7 +13,10 @@ function PostEdit() {
 	const [status, setStatus] = useState('draft'); // Set initial value
 	const [aiSummary, setAiSummary] = useState('');
 	const [loaded, setLoaded] = useState(false);
-	const [inProcess,setInProcess] = useState(false);
+	const [inSave,setInSave] = useState(false);
+	const [inPubSave,setInPubSave] = useState(false);
+	const [inDelete,setInDelete] = useState(false);
+	const [inGenAi,setInGenAi] = useState(false);
 	const [postChanged, setPostChanged] = useState(false);
 	
 	//first load article
@@ -62,7 +65,8 @@ function PostEdit() {
 				console.log(err.message);
 			})
 			.finally(() => {
-				setInProcess(false);
+				setInSave(false);
+				setInPubSave(false);
 			});
 	};
 	
@@ -86,7 +90,7 @@ function PostEdit() {
 				console.log(err.message);
 			})
 			.finally(() => {
-				setInProcess(false);
+				setInDelete(false);
 			});
 	};
 	
@@ -112,12 +116,13 @@ function PostEdit() {
 					console.log(err.message);
 				})
 				.finally(() => {
+					setInGenAi(false);
 				});
 		};
 	
 	const handleSave = (e: React.FormEvent) => {
 		e.preventDefault();
-		setInProcess(true);
+		setInSave(true);
 		updatePost(title, body, status);
 	};
 	const handleCancel = (e: React.FormEvent) => {
@@ -135,34 +140,51 @@ function PostEdit() {
 	const handleDelete = (e: React.FormEvent) => {
 		e.preventDefault();
 		if(confirm('Delete record?')){
+			setInDelete(true);
 			deletePost();
 		}
 	};
 	const handleGenAiSummary = (e: React.FormEvent) => {
 			e.preventDefault();
 			if(postChanged){
-				alert('There are unsaved changes. Data must be saved first.');
+				alert('There are unsaved changes. Data must be saved first.');				
 			}else{
+				setInGenAi(true);
 				getAiSummary();
 			}
 		};
-	const handleViewAiSummary = (e: React.FormEvent) => {
+	const handlePupUnPub = (e: React.FormEvent) => {
 		e.preventDefault();
-		alert('AI Summary: ' + aiSummary);
+		if(confirm("Save post and " + (status === 'draft'?'Publish?':'Unpublish?'))){
+			let newStatus:string = 'draft';
+			if(status === 'draft'){
+				newStatus = 'publish';
+			}
+			setStatus(newStatus);
+			setInPubSave(true);
+			updatePost(title, body, newStatus);				
+		}
 	};
-	
+	const handleViewAiSummary = (e: React.FormEvent) => {
+			e.preventDefault();
+			alert('AI Summary: ' + aiSummary);
+		};
+	const handleClearAiSummary = (e: React.FormEvent) => {
+		e.preventDefault();
+		setAiSummary('');
+		alert('AI Summary Cleared (Not Saved Yet)');
+	};
 	return (
 		<>			
-			<FormTitle text="Edit Post"/>
+			<FormTitle text={"Edit Post : " + (status==='draft'?'Draft':'Published')}/>
 			<Loading loaded={loaded}/>
 			<div className={loaded ? 'visible' : 'invisible'}>
-				<form onSubmit={handleSave}>
+				<form>
 					<div className='flex'>
-						<SubmitButton text="Save" inProcess={inProcess}/>
-						<button className="btn btn-sm btn-accent mr-3" onClick={handleDelete}>Delete</button>	
-						<button className="btn btn-sm mr-3" onClick={handleCancel}>Back</button>
-						<button className="btn btn-sm btn-outline btn-secondary mr-3" onClick={handleGenAiSummary}>Generate AI Summary</button>		
-						<button className="btn btn-sm btn-outline btn-secondary mr-3" onClick={handleViewAiSummary}>View AI Summary</button>			
+						<SubmitButton text="Save" inProcess={inSave} callback={handleSave} classes="btn-sm btn-primary"/>
+						<SubmitButton text={status === 'draft'?'Publish':'Unpublish'} inProcess={inPubSave} callback={handlePupUnPub} classes="btn-sm btn-secondary"/>
+						<button className="btn btn-sm mr-3" onClick={handleCancel}>Back</button>	
+						<SubmitButton text="Delete" inProcess={inDelete} callback={handleDelete} classes="btn-sm btn-accent"/>
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">
@@ -171,21 +193,18 @@ function PostEdit() {
 						<input type="text" className="input input-bordered w-full max-w-5xl" value={title}
 								onChange={(e) => {setTitle(e.target.value);setPostChanged(true);}} />
 					</label>
-					<div className="form-control ">
-						<label className="label cursor-pointer w-28">
-							<span className="label-text">Draft</span>
-							<input type="radio" name="status" value="draft" className="radio radio-primary" 
-								checked={status === 'draft'}  
-								onChange={(e) => {setStatus(e.target.value);setPostChanged(true);}} />
-						</label>
-					</div>
-					<div className="form-control mb-4">
-						<label className="label cursor-pointer w-28">
-							<span className="label-text">Publish</span>
-							<input type="radio" name="status" value="publish" className="radio radio-primary"
-								checked={status === 'publish'}
-								onChange={(e) => {setStatus(e.target.value);setPostChanged(true);}}  />
-						</label>
+					<div className="mb-4">
+						<div className="label">
+							<span className="label-text">AI Summary:</span>
+						</div>
+						<div>
+							<button className={aiSummary === ""?'hidden':'' + " btn btn-sm btn-outline btn-secondary mr-3"}
+									onClick={handleViewAiSummary}>View AI Summary</button>
+							<SubmitButton text="Generate AI Summary" inProcess={inGenAi} 
+									callback={handleGenAiSummary} classes="btn-sm btn-outline btn-secondary"/>
+							<button className={aiSummary === ""?'hidden':'' + " btn btn-sm btn-outline btn-secondary mr-3"}
+									onClick={handleClearAiSummary}>Clear AI Summary</button>
+						</div>
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">

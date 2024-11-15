@@ -32,6 +32,7 @@ import com.google.cloud.vertexai.generativeai.ResponseStream;
 
 import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.documentref.ArticleDoc;
+import ssg.serverlessblog.documentref.ArticleLikeDoc;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
 import ssg.serverlessblog.interfaces.ArticleDaoInt;
@@ -56,9 +57,65 @@ public class ArticleDao implements ArticleDaoInt {
 		}
 		return articles;
 	}
+	
+	private CollectionReference articles_likes = null;
+	private CollectionReference collectionLikes() throws IOException {
+		if(articles_likes == null) {
+			articles_likes = FirestoreDbUtil.getFirestoreDbObj().collection(ArticleLikeDoc.collection);
+		}
+		return articles_likes;
+	}
 		
+	
+	
 	@Override
-	public String createArticle(String accountId,Article article) throws Exception {
+	public long incrementArticleLike(final String articleId) throws Exception {
+		DocumentReference docRef = collectionLikes().document(articleId);			
+		ApiFuture<DocumentSnapshot> future = docRef.get();
+		DocumentSnapshot document = future.get();
+		long count = 0L;
+		if(!document.exists()) {				
+			//create new record.
+			count = 1L;
+			final Map<String, Object> data = new HashMap<>();
+			data.put(ArticleLikeDoc.field_like_count,count);
+			data.put(ArticleLikeDoc.field_updated_at, Timestamp.now());
+			final ApiFuture<WriteResult> wr = collectionLikes().document(articleId).set(data);
+			wr.get();
+			docRef = collectionLikes().document(articleId);
+			future = docRef.get();
+			document = future.get();
+		}else {
+			//Update record. Increment value.
+			count = document.getLong(ArticleLikeDoc.field_like_count);
+			count++;
+			final Map<String, Object> updates = new HashMap<>();
+			updates.put(ArticleLikeDoc.field_like_count,count);
+			updates.put(ArticleLikeDoc.field_updated_at, Timestamp.now());
+			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
+		    writeResult.get();
+		}
+		return count;		
+	}
+
+
+
+	@Override
+	public boolean isArticleExists(final String articleId) throws Exception {
+		boolean result = false;
+		final DocumentReference docRef = collection().document(articleId);			
+		final ApiFuture<DocumentSnapshot> future = docRef.get();
+		final DocumentSnapshot document = future.get();
+		if(document.exists()) {				
+			result = true;
+		}
+		return result;
+	}
+
+
+
+	@Override
+	public String createArticle(final String accountId,final Article article) throws Exception {
 		var newId = "";
 		try {
 			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
@@ -88,7 +145,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public Optional<CloudDocument> getArticleForManage(String accountId,String articleId) 
+	public Optional<CloudDocument> getArticleForManage(final String accountId,final String articleId) 
 			throws Exception {
 		Optional<CloudDocument> result = Optional.empty();
 		try {
@@ -116,7 +173,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public Optional<CloudDocument> getArticle(String articleId) 
+	public Optional<CloudDocument> getArticle(final String articleId) 
 			throws Exception {
 		Optional<CloudDocument> result = Optional.empty();
 		try {
@@ -124,7 +181,16 @@ public class ArticleDao implements ArticleDaoInt {
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
 			final DocumentSnapshot document = future.get();
 			if(document.exists()) {				
-				result = Optional.of(new CloudDocument(document.getId(), document.getData()));
+				final DocumentReference docRefLike = collectionLikes().document(articleId);			
+				final ApiFuture<DocumentSnapshot> futureLike = docRefLike.get();
+				final DocumentSnapshot docLike = futureLike.get();
+				final Map<String,Object> data = document.getData();
+				long likes = 0l;
+				if(docLike.exists()) {
+					likes = docLike.getLong(ArticleLikeDoc.field_like_count);
+				}
+				data.put(ArticleLikeDoc.field_like_count, likes);
+				result = Optional.of(new CloudDocument(document.getId(), data));
 			}else {
 				logger.warn("Article document not found: %s".formatted(articleId));
 				return result;
@@ -136,7 +202,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public boolean updateArticle(String accountId, Article article) throws Exception {
+	public boolean updateArticle(final String accountId, final Article article) throws Exception {
 		var result = false;
 		try {
 			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
@@ -177,7 +243,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public List<CloudDocument> getArticlesForManage(String accountId) throws Exception {
+	public List<CloudDocument> getArticlesForManage(final String accountId) throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
 			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
@@ -202,7 +268,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public List<CloudDocument> getArticlesForBlog(String accountId) throws Exception {
+	public List<CloudDocument> getArticlesForBlog(final String accountId) throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
 			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
@@ -224,7 +290,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public boolean deleteArticle(String accountId, String articleId) throws Exception {
+	public boolean deleteArticle(final String accountId, final String articleId) throws Exception {
 		var result = false;
 		try {
 			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
@@ -253,7 +319,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public String generateAiSummary(String accountId, String articleId) throws Exception {
+	public String generateAiSummary(final String accountId, final String articleId) throws Exception {
 		final var result = new StringBuilder();
 		final Optional<CloudDocument> setting = Env.settingDao.getSetting(Env.getAccountIdToUse(null));
 		try (VertexAI vertexAi = new VertexAI(setting.get().getString(SettingDoc.field_gae_ai_project_id), 

@@ -86,7 +86,7 @@ function SettingEdit() {
 				</div>
 				<form onSubmit={handleSave}>
 					<div className="flex">
-						<SubmitButton text="Save" inProcess={inProcess}/>
+						<SubmitButton text="Save" inProcess={inProcess} callback={handleSave} classes="btn-sm btn-primary"/>
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">
