@@ -22,3 +22,8 @@ export type LinkItem = {
 	url: string;
 	desc: string;
 }
+
+export type ImageItem = {
+	fileName: string;
+	url: string;	
+}

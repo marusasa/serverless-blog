@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.Timestamp;
+import com.google.cloud.firestore.AggregateQuery;
+import com.google.cloud.firestore.AggregateQuerySnapshot;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -128,9 +130,12 @@ public class ArticleDao implements ArticleDaoInt {
 			data.put(ArticleDoc.field_status, article.status());
 			data.put(ArticleDoc.field_created_at, Timestamp.now());
 			if(article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
-				data.put(ArticleDoc.field_published_at, Timestamp.now());
+				Timestamp now = Timestamp.now();
+				data.put(ArticleDoc.field_published_at, now);
+				data.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
 			}else {
 				data.put(ArticleDoc.field_published_at, null);
+				data.put(ArticleDoc.field_published_at_millisec, null);
 			}
 			data.put(ArticleDoc.field_updated_at, null);
 			data.put(ArticleDoc.field_summary, "");	//initially blank
@@ -228,7 +233,9 @@ public class ArticleDao implements ArticleDaoInt {
 				updates.put(ArticleDoc.field_summary_ai, true);
 				
 				if(oldStatus.equals(AppConst.ART_STATUS_DRAFT) && article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
-					updates.put(ArticleDoc.field_published_at, Timestamp.now());
+					Timestamp now = Timestamp.now();
+					updates.put(ArticleDoc.field_published_at, now);
+					updates.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
 				}
 				final ApiFuture<WriteResult> writeResult = docRef.update(updates);
 			    writeResult.get();				
@@ -268,14 +275,17 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public List<CloudDocument> getArticlesForBlog(final String accountId) throws Exception {
+	public List<CloudDocument> getArticlesForBlog(final String accountId, long publishedAtMillisec, int countPerPage) throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
 			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final Query query = collection()
 					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH)
-					.orderBy(ArticleDoc.field_published_at, Direction.DESCENDING);
+					.orderBy(ArticleDoc.field_published_at_millisec, Direction.DESCENDING)
+					.startAfter(publishedAtMillisec)
+					.limit(countPerPage);
+			
 			
 			final ApiFuture<QuerySnapshot> future = query.get();
 			final QuerySnapshot qs = future.get();
@@ -288,6 +298,50 @@ public class ArticleDao implements ArticleDaoInt {
 		}
 		return result;
 	}
+	
+	@Override
+	public List<CloudDocument> getArticlesForBlogAll(final String accountId) throws Exception {
+		final List<CloudDocument> result = new ArrayList<CloudDocument>();
+		try {
+			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			final Query query = collection()
+					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
+					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH)
+					.orderBy(ArticleDoc.field_published_at_millisec, Direction.DESCENDING);			
+			
+			final ApiFuture<QuerySnapshot> future = query.get();
+			final QuerySnapshot qs = future.get();
+				
+			for (QueryDocumentSnapshot document : qs.getDocuments()) {
+				result.add(new CloudDocument(document.getId(), document.getData()));
+			}
+		}catch(Exception e) {
+			throw e;
+		}
+		return result;
+	}
+	
+	
+
+	@Override
+	public long getArticlesForBlogTotalCount(String accountId) throws Exception {
+		long result = 0;
+		try {
+			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
+			final Query query = collection()
+					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
+					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH);
+			AggregateQuery countQuery = query.count();
+			
+			ApiFuture<AggregateQuerySnapshot> future =  countQuery.get();
+			result = future.get().getCount();			
+		}catch(Exception e) {
+			throw e;
+		}
+		return result;
+	}
+
+
 
 	@Override
 	public boolean deleteArticle(final String accountId, final String articleId) throws Exception {

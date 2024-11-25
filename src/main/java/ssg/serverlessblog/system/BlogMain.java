@@ -103,6 +103,10 @@ public class BlogMain {
 								get(ArticleController::getAiSummary);
 							});
 						});
+						path("/{articleId}/images",() -> {
+							post(ArticleController::addImage);
+							get(ArticleController::getImages);
+						});
 					});
 					path("setting", () ->{
 						get(SettingController::get);
@@ -146,6 +150,7 @@ public class BlogMain {
 		 ---------------------------------------------------*/
 		app.get("/basic-info", new BasicInfoHandler());		
 		app.get("/articles", new ArticleGetList());
+		app.get("/articles/page/{start-after}", new ArticleGetList());
 		app.get("/articles/{articleId}", new ArticleGet());
 		app.patch("/articles/{articleId}/like", new ArticleLikeUpdate());
 		app.post("/login", new LoginHandler());

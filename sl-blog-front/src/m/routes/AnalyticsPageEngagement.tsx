@@ -47,21 +47,28 @@ function AnalyticsPageEngagement() {
 			name: 'Page Path',
 			selector: row => row.path,
 			sortable: true,
+			wrap: true,
 		},
 		{
 			name: 'Total View',
 			selector: row => row.totalView,
 			sortable: true,
+			width: "10em",
+			center: true,
 		},
 		{
 			name: 'Actual View',
 			selector: row => row.actualView,
 			sortable: true,
+			width: "10em",
+			center: true,
 		},
 		{
 			name: 'Average time per Actual View',
 			selector: row => row.average,
 			sortable: true,
+			width: "10em",
+			center: true,
 		},
 		
 	];	

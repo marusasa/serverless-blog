@@ -1,0 +1,4 @@
+.reactMarkDown a{
+    @apply link;
+    @apply link-accent;
+}

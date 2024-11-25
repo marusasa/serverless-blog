@@ -20,6 +20,7 @@ public class ArticleDoc {
 	public final static String field_created_at = "created_at";
 	public final static String field_updated_at = "updated_at";
 	public final static String field_published_at = "published_at";
+	public final static String field_published_at_millisec = "published_at_millisec";
 	public final static String field_summary = "summary";
 	public final static String field_summary_ai = "summary_ai";
 

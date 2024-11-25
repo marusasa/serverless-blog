@@ -21,5 +21,6 @@ public class SettingDoc {
 	public final static String field_updated_at = "updated_at";
 	public final static String field_gae_ai_project_id = "gae_ai_project_id";
 	public final static String field_gae_ai_location = "gae_ai_location";
+	public final static String field_gae_storage_bucket = "gae_storage_bucket";
 
 }

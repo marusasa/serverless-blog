@@ -2,6 +2,7 @@ import './PostPage.css';
 import { Link, useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import Loading from "../m/components/Loading";
 
 function PostPage() {
@@ -16,7 +17,12 @@ function PostPage() {
 	const [likeClicked, setLikeClicked] = useState(false);
 	
 	useEffect(() => {
-		fetch('/articles/' + params.postId)
+		let postId = params.postId;
+		const index = params.postId.indexOf("#"); 
+		if(index > -1){
+			postId = postId.substring(0,index);
+		}
+		fetch('/articles/' + postId)
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.result == 'success') {
@@ -41,10 +47,12 @@ function PostPage() {
 	
 	const handleArticleClick = (event) => {
 		if (event.target.tagName === "A") {
-		   // Prevent the default link behavior (navigation)
-		   event.preventDefault();
-		   window.open(event.target.href,'_blank');		   
-		} 
+			if (event.target.getAttribute("href").toLowerCase().startsWith('http')) {
+				// Prevent the default link behavior (navigation)
+				event.preventDefault(); 
+				window.open(event.target.href, '_blank');
+			}
+		}
 	};
 	
 	const handleLike = (e: React.FormEvent) => {
@@ -74,6 +82,22 @@ function PostPage() {
 			});
 	}
 	
+	const generateSlug = (input: string) => {
+		let str = input.replace(/^\s+|\s+$/g, "");
+		str = str.toLowerCase();
+		str = str
+			.replace(/[^a-z0-9 -]/g, "")
+			.replace(/\s+/g, "-")
+			.replace(/-+/g, "-");
+		return str;
+	};
+	
+	const components = {
+		h1: ({ children }) => <h1 id={generateSlug(children)}>{children}</h1>,
+	    h2: ({ children }) => <h2 id={generateSlug(children)}>{children}</h2>,
+		h3: ({ children }) => <h3 id={generateSlug(children)}>{children}</h3>,
+	  };
+	
 	return (
 		<>
 			<div className="py-4">
@@ -95,7 +119,8 @@ function PostPage() {
 									<span className={(processLike? '':'hidden ') + " loading loading-spinner"}></span>
 								</button>
 							</div>
-							<p className='prose max-w-none' ref={refArticleP}><Markdown className="reactMarkDown">{article.body}</Markdown></p>
+							<p className='prose max-w-none' ref={refArticleP}><Markdown className="reactMarkDown" 
+									remarkPlugins={[remarkGfm]} components={components}>{article.body}</Markdown></p>
 						</article>
 					</div>
 				</div>

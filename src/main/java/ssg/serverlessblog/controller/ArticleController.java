@@ -12,6 +12,7 @@ import ssg.serverlessblog.data_json.ResultAiSummary;
 import ssg.serverlessblog.data_json.ResultArticle;
 import ssg.serverlessblog.data_json.ResultArticleList;
 import ssg.serverlessblog.data_json.ResultBase;
+import ssg.serverlessblog.data_json.ResultImageList;
 import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.system.Env;
@@ -164,6 +165,40 @@ public class ArticleController {
 			logger.error("Error getting articles.",e);
 			result.getMessages().add("Error getting articles.");
 		}
+		ctx.json(result);
+	}
+	
+	public static void addImage(Context ctx) {
+		final ResultBase result = new ResultBase();
+		try {			
+			final var files = ctx.uploadedFiles();
+			final String articleId = ctx.pathParam("articleId");
+			files.forEach(uploadedFile -> {
+				try {
+					Env.storageDao.addFile("ARTICLES/" + articleId, uploadedFile.filename(), uploadedFile.content());
+				}catch(Exception e) {
+					e.printStackTrace();
+				}
+			 	
+			});
+			result.setResult(AppConst.RESULT_SUCCESS);
+		}catch(Exception e) {
+			logger.error("Error getting articles.",e);
+			result.getMessages().add("Error getting articles.");
+		}
+		ctx.json(result);
+	}
+	
+	public static void getImages(Context ctx) {
+		final var result = new ResultImageList();
+		final String articleId = ctx.pathParam("articleId");
+		try {
+			result.images = Env.storageDao.getImages(articleId);
+			result.setResult(AppConst.RESULT_SUCCESS);
+		}catch(Exception e) {
+			logger.error("Error getting images.",e);
+			result.getMessages().add("Error getting images.");
+		}		
 		ctx.json(result);
 	}
 }

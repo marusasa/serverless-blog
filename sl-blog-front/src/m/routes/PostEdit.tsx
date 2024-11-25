@@ -1,7 +1,8 @@
-import { useState,useEffect } from 'react';
+import { useState,useEffect,useRef } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import {SubmitButton, FormTitle} from "../components/FormComp";
+import FullScreenEditor from '../components/FullScreenEditor';
 
 function PostEdit() {
 	const navigate = useNavigate();
@@ -18,6 +19,8 @@ function PostEdit() {
 	const [inDelete,setInDelete] = useState(false);
 	const [inGenAi,setInGenAi] = useState(false);
 	const [postChanged, setPostChanged] = useState(false);
+	const dialogRef = useRef(null);
+	const [saveMsg,setSaveMsg] = useState('');
 	
 	//first load article
 	useEffect(() => {
@@ -54,7 +57,10 @@ function PostEdit() {
 			.then((response) => response.json())
 			.then((data) => {
 				if (data.result == 'success') {
-					alert('Data saved.');
+					setSaveMsg('Data Saved.');
+					setTimeout(() => {
+						setSaveMsg('');
+					},2000);
 					setPostChanged(false);
 				} else {
 					alert(JSON.stringify(data.messages));
@@ -174,6 +180,10 @@ function PostEdit() {
 		setAiSummary('');
 		alert('AI Summary Cleared (Not Saved Yet)');
 	};
+	const handleOpenFullScreenEditor = (e: React.FormEvent) => {
+		e.preventDefault();
+		dialogRef.current.showModal();			
+	};
 	return (
 		<>			
 			<FormTitle text={"Edit Post : " + (status==='draft'?'Draft':'Published')}/>
@@ -185,6 +195,7 @@ function PostEdit() {
 						<SubmitButton text={status === 'draft'?'Publish':'Unpublish'} inProcess={inPubSave} callback={handlePupUnPub} classes="btn-sm btn-secondary"/>
 						<button className="btn btn-sm mr-3" onClick={handleCancel}>Back</button>	
 						<SubmitButton text="Delete" inProcess={inDelete} callback={handleDelete} classes="btn-sm btn-accent"/>
+						<span className="text-red-500 mt-1">{saveMsg}</span>
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">
@@ -208,7 +219,8 @@ function PostEdit() {
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">
-							<span className="label-text">Article:</span>
+							<span className="label-text">Article: 
+								<button className="ml-3 btn btn-xs" onClick={handleOpenFullScreenEditor}>Full-Screen Editor</button></span>
 						</div>
 						<textarea className="textarea textarea-bordered w-full max-w-5xl" value={body}
 								onChange={(e) => {setBody(e.target.value);setPostChanged(true);}} rows={20}></textarea>
@@ -216,7 +228,8 @@ function PostEdit() {
 					
 				</form>
 			</div>
-
+			<FullScreenEditor ref={dialogRef} body={body} setBody={setBody} setPostChanged={setPostChanged} 
+					handleSave={handleSave} inSave={inSave} saveMsg={saveMsg} articleId={articleId}/>
 		</>
 	)
 }

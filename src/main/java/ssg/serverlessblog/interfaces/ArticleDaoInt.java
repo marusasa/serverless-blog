@@ -18,7 +18,9 @@ public interface ArticleDaoInt {
 	public Optional<CloudDocument> getArticle(String articleId) throws Exception;
 	public boolean updateArticle(String accountId,Article article) throws Exception;
 	public List<CloudDocument> getArticlesForManage(String accountId) throws Exception;
-	public List<CloudDocument> getArticlesForBlog(String accountId) throws Exception;
+	public List<CloudDocument> getArticlesForBlog(String accountId, long publishedAtMillisec, int countPerPage) throws Exception;
+	public List<CloudDocument> getArticlesForBlogAll(String accountId) throws Exception;
+	public long getArticlesForBlogTotalCount(String accountId) throws Exception;
 	public boolean deleteArticle(String accountId, String articleId) throws Exception;	
 	public String generateAiSummary(String accountId, String articleId) throws Exception;
 	public long incrementArticleLike(String articleId) throws Exception;

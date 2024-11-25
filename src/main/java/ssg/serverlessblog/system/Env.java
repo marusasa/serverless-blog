@@ -12,6 +12,7 @@ import ssg.serverlessblog.interfaces.ArticleDaoInt;
 import ssg.serverlessblog.interfaces.DataUtilInt;
 import ssg.serverlessblog.interfaces.PageComponentDaoInt;
 import ssg.serverlessblog.interfaces.SettingDaoInt;
+import ssg.serverlessblog.interfaces.StorageDaoInt;
 import ssg.serverlessblog.interfaces.SystemDaoInt;
 import ssg.serverlessblog.interfaces.UserDaoInt;
 import ssg.serverlessblog.util.AppProperties;
@@ -39,6 +40,7 @@ public class Env {
 	static public DataUtilInt dataUtil = null;
 	static public SessionDataStore noSqlSessionDataStore = null;
 	static public AnalyticsDaoInt analyticsDao = null;
+	static public StorageDaoInt storageDao = null;
 	
 	static {
 		try {
@@ -52,6 +54,7 @@ public class Env {
 				dataUtil = (DataUtilInt)getClassObject("ssg.serverlessblog.gae.util.FirestoreDbUtil");
 				noSqlSessionDataStore = (SessionDataStore)getClassObject("ssg.serverlessblog.gae.util.FirestoreDataStore");
 				analyticsDao = (AnalyticsDaoInt)getClassObject("ssg.serverlessblog.gae.dao.AnalyticsDao");
+				storageDao = (StorageDaoInt)getClassObject("ssg.serverlessblog.gae.dao.StorageDao");
 			}
 		}catch(Exception e) {
 			logger.error("Error loading environment classes.",e);

@@ -30,4 +30,8 @@ public class AppProperties {
 	public static boolean getBoolean(String name) {
 		return Boolean.parseBoolean(get().getProperty(name));
 	}
+	
+	public static int getInt(String name) {
+		return Integer.parseInt(get().getProperty(name));
+	}
 }
