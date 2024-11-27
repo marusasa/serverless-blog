@@ -39,8 +39,7 @@ public class BasicInfoHandler implements Handler {
 				result.setFaviconUrl(AppProperties.getString("basic.favicon-url"));
 				result.setResult(AppConst.RESULT_SUCCESS);				
 			}else {
-				final var accountId = Env.getAccountIdToUse(ctx);
-				final Optional<CloudDocument> setting = Env.settingDao.getSetting(accountId);
+				final Optional<CloudDocument> setting = Env.settingDao.getSetting();
 							
 				if(setting.isPresent()) {
 					final var document = setting.get();

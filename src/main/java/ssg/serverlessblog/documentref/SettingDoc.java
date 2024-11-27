@@ -12,7 +12,6 @@ public class SettingDoc {
 	 */
 	public final static String collection = "settings";
 
-	public final static String field_ref_account_id = "ref_account_id";
 	public final static String field_blog_title = "blog_title";
 	public final static String field_blog_subtitle = "blog_subtitle";
 	public final static String field_icon_url = "icon_url";

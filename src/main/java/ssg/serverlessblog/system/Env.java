@@ -80,21 +80,5 @@ public class Env {
 			//do nothing by design.
 		}
 		return result;
-	}
-	
-	public static String getAccountIdToUse(Context ctx) throws Exception {		
-		if(AppProperties.getBoolean("env.is-single-tenant")) {
-			if(singleTenantAccountId.isEmpty()) {
-				singleTenantAccountId = Optional.of(Env.systemDao.getSingleTenantAccoundId());
-				logger.info("Default account ID loaded.");
-			}			
-			return singleTenantAccountId.get();
-		}else {
-			//TBD...
-			logger.error("Account ID requested for non-single tenant environment. This is not implemented yet.");
-			return "";
-		}
-	}
-	
-	
+	}	
 }

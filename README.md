@@ -62,13 +62,7 @@ Name it '(default)'.
 - Add needed indexes.
 
 ```
-	gcloud firestore indexes composite create --collection-group=page-components --field-config=field-path=ref_account_id,order=ascending --field-config=field-path=view_order,order=ascending
-```
-```
-	gcloud firestore indexes composite create --collection-group=articles --field-config=field-path=ref_account_id,order=ascending --field-config=field-path=status,order=ascending --field-config=field-path=published_at,order=descending
-```
-```
-	gcloud firestore indexes composite create --collection-group=articles --field-config=field-path=ref_account_id,order=ascending --field-config=field-path=created_at,order=descending
+	gcloud firestore indexes composite create --collection-group=articles --field-config=field-path=status,order=ascending --field-config=field-path=published_at_millisec,order=descending
 ```
 
 

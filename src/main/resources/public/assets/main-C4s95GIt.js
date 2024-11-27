@@ -1,4 +1,4 @@
-import { j as jsxRuntimeExports, r as reactExports, C as Constants, L as Loading, O as Outlet, a as Link, u as useOutletContext, b as useParams, M as Markdown, c as remarkGfm, d as createBrowserRouter, e as createRoot, R as RouterProvider } from "./index-Bv8Uz6c5.js";
+import { j as jsxRuntimeExports, r as reactExports, C as Constants, L as Loading, O as Outlet, a as Link, u as useOutletContext, b as useParams, M as Markdown, c as remarkGfm, d as createBrowserRouter, e as createRoot, R as RouterProvider } from "./index-BfZCrIl1.js";
 function BlogTop({ title, subTitle }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-row", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "grow", children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("h1", { className: "text-5xl pb-5", children: /* @__PURE__ */ jsxRuntimeExports.jsx("a", { href: "/", children: title }) }),
@@ -291,12 +291,25 @@ function Posts() {
   const [articles, setArticles] = reactExports.useState([]);
   const [parentLoaded, setParentLoaded] = useOutletContext();
   const [loaded, setLoaded] = reactExports.useState(false);
-  reactExports.useEffect(() => {
+  const [hasMore, setHasMore] = reactExports.useState(true);
+  const [pagingArray, setPagingArray] = reactExports.useState([0]);
+  const [pageNum, setPageNum] = reactExports.useState(1);
+  const [pageTotal, setPageTotal] = reactExports.useState(0);
+  const loadData = () => {
     setLoaded(false);
-    fetch("/articles").then((response) => response.json()).then((data) => {
+    fetch("/articles/page/" + pagingArray[pageNum - 1]).then((response) => response.json()).then((data) => {
       if (data.result == "success") {
         setLoaded(true);
         setArticles(data.articles);
+        setHasMore(data.hasMore);
+        if (pagingArray.length == pageNum) {
+          pagingArray.push(data.lastQueryVal);
+          setPagingArray(pagingArray);
+        }
+        if (pageNum == 1) {
+          setPageTotal(data.pageTotal);
+        }
+        window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         alert(JSON.stringify(data.messages));
       }
@@ -305,13 +318,48 @@ function Posts() {
       console.log(err.message);
       alert("Failed to load articles.");
     });
-  }, []);
-  return /* @__PURE__ */ jsxRuntimeExports.jsx(jsxRuntimeExports.Fragment, { children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-4", children: [
-    /* @__PURE__ */ jsxRuntimeExports.jsx(Loading, { loaded: parentLoaded ? loaded : true }),
-    articles.map((a) => {
-      return /* @__PURE__ */ jsxRuntimeExports.jsx(PostsItem, { article: a }, a.articleId);
-    })
-  ] }) });
+  };
+  reactExports.useEffect(() => {
+    loadData();
+  }, [pageNum]);
+  const next = () => {
+    setPageNum(pageNum + 1);
+  };
+  const prev = () => {
+    setPageNum(pageNum - 1);
+  };
+  return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "py-4", children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(Loading, { loaded: parentLoaded ? loaded : true }),
+      articles.map((a) => {
+        return /* @__PURE__ */ jsxRuntimeExports.jsx(PostsItem, { article: a }, a.articleId);
+      })
+    ] }),
+    /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "flex flex-col items-center pb-4 " + (loaded ? "" : "hidden"), children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { children: [
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          className: "btn btn-secondary btn-sm mr-3 px-6 " + (pageNum == 1 ? " btn-disabled " : ""),
+          onClick: prev,
+          children: "<"
+        }
+      ),
+      /* @__PURE__ */ jsxRuntimeExports.jsxs("span", { children: [
+        "Page: ",
+        pageNum,
+        "/",
+        pageTotal
+      ] }),
+      /* @__PURE__ */ jsxRuntimeExports.jsx(
+        "button",
+        {
+          className: "btn btn-secondary btn-sm ml-3 px-6 " + (hasMore ? " " : " btn-disabled "),
+          onClick: next,
+          children: ">"
+        }
+      )
+    ] }) })
+  ] });
 }
 function PostPage() {
   const params = useParams();

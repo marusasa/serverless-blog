@@ -9,5 +9,5 @@ import java.util.Optional;
  * (At the moment there is only one implementation.
  */
 public interface UserDaoInt {
-	public Optional<String> login(String username, String password) throws Exception;
+	public boolean login(String username, String password) throws Exception;
 }

@@ -13,7 +13,6 @@ import ssg.serverlessblog.data_json.ResultArticle;
 import ssg.serverlessblog.data_json.ResultArticleList;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultImageList;
-import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
@@ -29,11 +28,10 @@ public class ArticleController {
 	public static void getAiSummary(Context ctx) {
 		final ResultAiSummary result = new ResultAiSummary();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			final String articleId = ctx.pathParam("articleId");
 			
 			//generate
-			final String summary = Env.articleDao.generateAiSummary(accountId, articleId);
+			final String summary = Env.articleDao.generateAiSummary(articleId);
 			result.setSummary(summary);
 			
 			result.setResult(AppConst.RESULT_SUCCESS);
@@ -49,10 +47,9 @@ public class ArticleController {
 	public static void createArticle(Context ctx) {
 		ResultBase result = new ResultBase();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);			
 			final Article article = ctx.bodyAsClass(Article.class);
 			
-			final String newId = Env.articleDao.createArticle(accountId, article);
+			final String newId = Env.articleDao.createArticle(article);
 			
 			logger.info("Data inserted with id: %s".formatted(newId));
 			
@@ -68,9 +65,8 @@ public class ArticleController {
 		final ResultArticle result = new ResultArticle();
 		try {
 			final String articleId = ctx.pathParam("articleId");
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			
-			final Optional<CloudDocument> op = Env.articleDao.getArticleForManage(accountId, articleId); 
+			final Optional<CloudDocument> op = Env.articleDao.getArticleForManage( articleId); 
 						
 			if(op.isEmpty()) {
 				result.getMessages().add("Article not obtained.");
@@ -104,10 +100,9 @@ public class ArticleController {
 	public static void updateArticle(Context ctx) {
 		final ResultBase result = new ResultBase();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			final Article article = ctx.bodyAsClass(Article.class);
 			
-			if(Env.articleDao.updateArticle(accountId, article)) {
+			if(Env.articleDao.updateArticle(article)) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Article %s not updated.".formatted(article.articleId()));
@@ -124,9 +119,8 @@ public class ArticleController {
 		final ResultBase result = new ResultBase();
 		try {
 			final String articleId = ctx.pathParam("articleId");
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			
-			if(Env.articleDao.deleteArticle(accountId, articleId)) {
+			if(Env.articleDao.deleteArticle( articleId)) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Article %s not deleted.".formatted(articleId));
@@ -142,8 +136,7 @@ public class ArticleController {
 	public static void listArticleForManage(Context ctx) {
 		final ResultArticleList result = new ResultArticleList();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-			final List<CloudDocument> list = Env.articleDao.getArticlesForManage(accountId);			
+			final List<CloudDocument> list = Env.articleDao.getArticlesForManage();			
 			
 			for (CloudDocument document : list) {				
 				var publishedAt = "";

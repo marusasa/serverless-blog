@@ -117,14 +117,11 @@ public class ArticleDao implements ArticleDaoInt {
 
 
 	@Override
-	public String createArticle(final String accountId,final Article article) throws Exception {
+	public String createArticle(final Article article) throws Exception {
 		var newId = "";
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
-			
 			//add article to database
 			final Map<String, Object> data = new HashMap<>();
-			data.put(ArticleDoc.field_ref_account_id,accountDocRef);
 			data.put(ArticleDoc.field_title, article.title());
 			data.put(ArticleDoc.field_body, article.body());
 			data.put(ArticleDoc.field_status, article.status());
@@ -150,11 +147,10 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public Optional<CloudDocument> getArticleForManage(final String accountId,final String articleId) 
+	public Optional<CloudDocument> getArticleForManage(final String articleId) 
 			throws Exception {
 		Optional<CloudDocument> result = Optional.empty();
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final DocumentReference docRef = collection().document(articleId);			
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
 			final DocumentSnapshot document = future.get();
@@ -164,13 +160,7 @@ public class ArticleDao implements ArticleDaoInt {
 			}
 			
 			//make sure it belongs to this account
-			final DocumentReference refAccount = (DocumentReference)document.get(ArticleDoc.field_ref_account_id); 
-			if(refAccount.equals(accountDocRef)) {
-				result = Optional.of(new CloudDocument(document.getId(), document.getData()));
-			}else {
-				logger.warn("Article %s not authorized with account %s".formatted(articleId,accountId));
-				return result;
-			}						
+			result = Optional.of(new CloudDocument(document.getId(), document.getData()));						
 		}catch(Exception e) {
 			throw e;
 		}
@@ -207,10 +197,9 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public boolean updateArticle(final String accountId, final Article article) throws Exception {
+	public boolean updateArticle(final Article article) throws Exception {
 		var result = false;
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final DocumentReference docRef = collection().document(article.articleId());
 			
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
@@ -219,30 +208,26 @@ public class ArticleDao implements ArticleDaoInt {
 				logger.warn("Article document not found: %s".formatted(article.articleId()));
 				return result;
 			}
+			 
+			//update document
+			final var oldStatus = document.getString(ArticleDoc.field_status);
+			final Map<String, Object> updates = new HashMap<>();
+			updates.put(ArticleDoc.field_title, article.title());
+			updates.put(ArticleDoc.field_body, article.body());
+			updates.put(ArticleDoc.field_status, article.status());
+			updates.put(ArticleDoc.field_updated_at, Timestamp.now());
+			updates.put(ArticleDoc.field_summary, article.summary());
+			updates.put(ArticleDoc.field_summary_ai, true);
 			
-			final DocumentReference refAccount = (DocumentReference)document.get(ArticleDoc.field_ref_account_id); 
-			if(refAccount.equals(accountDocRef)) {
-				//update document
-				final var oldStatus = document.getString(ArticleDoc.field_status);
-				final Map<String, Object> updates = new HashMap<>();
-				updates.put(ArticleDoc.field_title, article.title());
-				updates.put(ArticleDoc.field_body, article.body());
-				updates.put(ArticleDoc.field_status, article.status());
-				updates.put(ArticleDoc.field_updated_at, Timestamp.now());
-				updates.put(ArticleDoc.field_summary, article.summary());
-				updates.put(ArticleDoc.field_summary_ai, true);
-				
-				if(oldStatus.equals(AppConst.ART_STATUS_DRAFT) && article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
-					Timestamp now = Timestamp.now();
-					updates.put(ArticleDoc.field_published_at, now);
-					updates.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
-				}
-				final ApiFuture<WriteResult> writeResult = docRef.update(updates);
-			    writeResult.get();				
-				result = true;
-			}else {
-				logger.warn("Article %s not authorized with account %s".formatted(article.articleId(),accountId));
+			if(oldStatus.equals(AppConst.ART_STATUS_DRAFT) && article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
+				Timestamp now = Timestamp.now();
+				updates.put(ArticleDoc.field_published_at, now);
+				updates.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
 			}
+			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
+		    writeResult.get();				
+			result = true;
+			
 		}catch(Exception e) {
 			throw e;
 		}
@@ -250,12 +235,10 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public List<CloudDocument> getArticlesForManage(final String accountId) throws Exception {
+	public List<CloudDocument> getArticlesForManage() throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final Query query = collection()
-					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.orderBy(ArticleDoc.field_created_at, Direction.DESCENDING);
 			
 			final ApiFuture<QuerySnapshot> future = query.get();
@@ -275,17 +258,16 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public List<CloudDocument> getArticlesForBlog(final String accountId, long publishedAtMillisec, int countPerPage) throws Exception {
+	public List<CloudDocument> getArticlesForBlog( long publishedAtMillisec, int countPerPage) throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
-			final Query query = collection()
-					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
+			Query query = collection()
 					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH)
 					.orderBy(ArticleDoc.field_published_at_millisec, Direction.DESCENDING)
-					.startAfter(publishedAtMillisec)
-					.limit(countPerPage);
-			
+					.limit(countPerPage+1);
+			if(publishedAtMillisec > 0) {
+				query = query.startAfter(publishedAtMillisec);
+			}			
 			
 			final ApiFuture<QuerySnapshot> future = query.get();
 			final QuerySnapshot qs = future.get();
@@ -300,12 +282,10 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public List<CloudDocument> getArticlesForBlogAll(final String accountId) throws Exception {
+	public List<CloudDocument> getArticlesForBlogAll() throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final Query query = collection()
-					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH)
 					.orderBy(ArticleDoc.field_published_at_millisec, Direction.DESCENDING);			
 			
@@ -324,12 +304,10 @@ public class ArticleDao implements ArticleDaoInt {
 	
 
 	@Override
-	public long getArticlesForBlogTotalCount(String accountId) throws Exception {
+	public long getArticlesForBlogTotalCount() throws Exception {
 		long result = 0;
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final Query query = collection()
-					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.whereEqualTo(ArticleDoc.field_status, AppConst.ART_STATUS_PUBLISH);
 			AggregateQuery countQuery = query.count();
 			
@@ -344,10 +322,9 @@ public class ArticleDao implements ArticleDaoInt {
 
 
 	@Override
-	public boolean deleteArticle(final String accountId, final String articleId) throws Exception {
+	public boolean deleteArticle(final String articleId) throws Exception {
 		var result = false;
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final DocumentReference docRef = collection().document(articleId);
 			
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
@@ -356,13 +333,7 @@ public class ArticleDao implements ArticleDaoInt {
 				logger.warn("Article document not found: %s".formatted(articleId));
 				return result;
 			}
-			
-			final DocumentReference refAccount = (DocumentReference)document.get(ArticleDoc.field_ref_account_id); 
-			if(!refAccount.equals(accountDocRef)) {
-				logger.warn("Article %s not authorized with account %s".formatted(articleId,accountId));
-				return result;
-			}		
-			
+			 			
 			ApiFuture<WriteResult> writeResult = docRef.delete();
 			writeResult.get();
 			result = true;
@@ -373,13 +344,13 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public String generateAiSummary(final String accountId, final String articleId) throws Exception {
+	public String generateAiSummary(final String articleId) throws Exception {
 		final var result = new StringBuilder();
-		final Optional<CloudDocument> setting = Env.settingDao.getSetting(Env.getAccountIdToUse(null));
+		final Optional<CloudDocument> setting = Env.settingDao.getSetting();
 		try (VertexAI vertexAi = new VertexAI(setting.get().getString(SettingDoc.field_gae_ai_project_id), 
 				setting.get().getString(SettingDoc.field_gae_ai_location));) {
 			// get article
-			final Optional<CloudDocument> op = getArticleForManage(accountId, articleId);
+			final Optional<CloudDocument> op = getArticleForManage(articleId);
 			if (op.isPresent()) {
 				final CloudDocument document = op.get();
 				final var text1 = document.getString(ArticleDoc.field_body);

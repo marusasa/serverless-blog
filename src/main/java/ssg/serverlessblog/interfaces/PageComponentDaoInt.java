@@ -12,9 +12,9 @@ import ssg.serverlessblog.util.CloudDocument;
  * (At the moment there is only one implementation.
  */
 public interface PageComponentDaoInt {
-	public String createPageComponent(String accountId, String type, String json, long order, boolean enabled) throws Exception;
-	public boolean updatePageComponent(String accountId, String pageComponentId, String json, long order, boolean enabled) throws Exception;
-	public List<CloudDocument> getPageComponents(String accountId) throws Exception;
-	public Optional<CloudDocument> getPageComponent(String accountId, String pageComponentId) throws Exception;
-	public boolean deletePageComponent(String accountId, String pageComponentId) throws Exception;	
+	public String createPageComponent(String type, String json, long order, boolean enabled) throws Exception;
+	public boolean updatePageComponent(String pageComponentId, String json, long order, boolean enabled) throws Exception;
+	public List<CloudDocument> getPageComponents() throws Exception;
+	public Optional<CloudDocument> getPageComponent(String pageComponentId) throws Exception;
+	public boolean deletePageComponent(String pageComponentId) throws Exception;	
 }

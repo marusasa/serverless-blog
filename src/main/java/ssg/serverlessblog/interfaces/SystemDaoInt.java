@@ -7,8 +7,6 @@ package ssg.serverlessblog.interfaces;
  * (At the moment there is only one implementation.
  */
 public interface SystemDaoInt {
-	public int getAccountsSize() throws Exception;
-	public String getSingleTenantAccoundId() throws Exception;
 	public String createInitialSystemData() throws Exception;	
 	
 }

@@ -30,8 +30,8 @@ public class UserDao implements UserDaoInt {
 	}
 	
 	@Override
-	public Optional<String> login(String username, String password) throws Exception {
-		Optional<String> result = Optional.empty();
+	public boolean login(String username, String password) throws Exception {
+		boolean result = false;
 		try {
 			
 			final ApiFuture<DocumentSnapshot> future = collection().document(username).get();
@@ -45,9 +45,7 @@ public class UserDao implements UserDaoInt {
 				//compare the hashed value.
 				if(passInDataStore.equals(passHash)) {
 					//username and password match.
-					//return account id
-					final String accountId = ((DocumentReference)docSnapshot.get(UserDoc.field_ref_account_id)).getId();
-					result = Optional.of(accountId);										
+					result = true;
 				}	
 			}
 		}catch(Exception e) {

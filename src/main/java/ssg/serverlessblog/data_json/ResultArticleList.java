@@ -9,29 +9,38 @@ public class ResultArticleList extends ResultBase {
 	 * For service result, always instantiate an object to prevent null situation.
 	 */
 	private List<Article> articles = new ArrayList<>();
-	private int pageCurrent = 0;
-	private int pageMax = 0; 
+	private long lastQueryVal = 0;
+	private boolean hasMore = false; 
+	private int pageTotal = 0;
 
 	public List<Article> getArticles() {
 		return articles;
 	}
 
-	public int getPageCurrent() {
-		return pageCurrent;
+	public long getLastQueryVal() {
+		return lastQueryVal;
 	}
 
-	public void setPageCurrent(int pageCurrent) {
-		this.pageCurrent = pageCurrent;
+	public void setLastQueryVal(long lastQueryVal) {
+		this.lastQueryVal = lastQueryVal;
 	}
 
-	public int getPageMax() {
-		return pageMax;
+	public boolean isHasMore() {
+		return hasMore;
 	}
 
-	public void setPageMax(int pageMax) {
-		this.pageMax = pageMax;
+	public void setHasMore(boolean hasMore) {
+		this.hasMore = hasMore;
 	}
-	
+
+	public int getPageTotal() {
+		return pageTotal;
+	}
+
+	public void setPageTotal(int pageTotal) {
+		this.pageTotal = pageTotal;
+	}
+
 	
 
 }

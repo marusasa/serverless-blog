@@ -3008,6 +3008,9 @@ html:has(.drawer-toggle:checked) {
 .place-content-center {
   place-content: center;
 }
+.items-center {
+  align-items: center;
+}
 .justify-center {
   justify-content: center;
 }
@@ -3071,12 +3074,19 @@ html:has(.drawer-toggle:checked) {
 .p-4 {
   padding: 1rem;
 }
+.px-6 {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
 .py-4 {
   padding-top: 1rem;
   padding-bottom: 1rem;
 }
 .pb-3 {
   padding-bottom: 0.75rem;
+}
+.pb-4 {
+  padding-bottom: 1rem;
 }
 .pb-5 {
   padding-bottom: 1.25rem;

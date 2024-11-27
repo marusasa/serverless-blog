@@ -18,7 +18,6 @@ import ssg.serverlessblog.data_json.ReqPCTextBox;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultPageComponent;
 import ssg.serverlessblog.data_json.ResultPageComponentList;
-import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.PageComponentDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
@@ -38,9 +37,8 @@ public class PageComponentController {
 		final ResultBase result = new ResultBase();
 		try {
 			final String pageComponentId = ctx.pathParam("pageComponentId");
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			
-			if(Env.pageComponentDao.deletePageComponent(accountId, pageComponentId)) {
+			if(Env.pageComponentDao.deletePageComponent(pageComponentId)) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Page Component %s not deleted.".formatted(pageComponentId));
@@ -56,9 +54,8 @@ public class PageComponentController {
 	public static void getItem(Context ctx) {
 		final ResultPageComponent result = new ResultPageComponent();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 			final String pageComponentId = ctx.pathParam("pageComponentId");
-			final Optional<CloudDocument> data = Env.pageComponentDao.getPageComponent(accountId, pageComponentId);
+			final Optional<CloudDocument> data = Env.pageComponentDao.getPageComponent(pageComponentId);
 			
 			if(data.isPresent()) {
 				final CloudDocument document = data.get();
@@ -82,8 +79,7 @@ public class PageComponentController {
 	public static void getList(Context ctx) {
 		final ResultPageComponentList result = new ResultPageComponentList();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents(accountId);
+			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents();
 			
 			list.forEach(document -> {
 				final var pc = new PageComponent.Builder()
@@ -105,7 +101,6 @@ public class PageComponentController {
 	
 	public static void updateProfilePic(Context ctx) {
 		final ResultBase result = new ResultBase();
-		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 		final ReqPCProfilePic req = ctx.bodyAsClass(ReqPCProfilePic.class);
 		final String pageComponentId = ctx.pathParam("pageComponentId");
 		
@@ -117,7 +112,7 @@ public class PageComponentController {
 		}
 		
 		try {
-			if(Env.pageComponentDao.updatePageComponent(accountId, pageComponentId, mapper.writeValueAsString(req.data()),req.order(),req.enabled())){
+			if(Env.pageComponentDao.updatePageComponent(pageComponentId, mapper.writeValueAsString(req.data()),req.order(),req.enabled())){
 				logger.info("Profile picture updated.");
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
@@ -133,25 +128,24 @@ public class PageComponentController {
 	
 	public static void createNewDefault(Context ctx) {
 		final ResultBase result = new ResultBase();
-		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 		final ReqPCNew req = ctx.bodyAsClass(ReqPCNew.class);
 		
 		try {
 			switch(req.type()) {
 				case AppConst.PC_TYPE_LINK_LIST:
-					Env.pageComponentDao.createPageComponent(accountId, AppConst.PC_TYPE_LINK_LIST,
+					Env.pageComponentDao.createPageComponent( AppConst.PC_TYPE_LINK_LIST,
 							mapper.writeValueAsString(SampleDataUtil.getSampleLinkList()), 100L, false);
 					result.setResult(AppConst.RESULT_SUCCESS);
 					logger.info("Default Link List created.");
 					break;
 				case AppConst.PC_TYPE_PROFILE_PIC:
-					Env.pageComponentDao.createPageComponent(accountId, AppConst.PC_TYPE_PROFILE_PIC,
+					Env.pageComponentDao.createPageComponent( AppConst.PC_TYPE_PROFILE_PIC,
 							mapper.writeValueAsString(SampleDataUtil.getSampleProfilePic()), 101L, false);
 					result.setResult(AppConst.RESULT_SUCCESS);
 					logger.info("Default Profile Pic created.");
 					break;
 				case AppConst.PC_TYPE_TEXT_BOX:
-					Env.pageComponentDao.createPageComponent(accountId, AppConst.PC_TYPE_TEXT_BOX,
+					Env.pageComponentDao.createPageComponent( AppConst.PC_TYPE_TEXT_BOX,
 							mapper.writeValueAsString(SampleDataUtil.getSampleTextBox()), 102L, false);
 					result.setResult(AppConst.RESULT_SUCCESS);
 					logger.info("Default Text Box created.");
@@ -168,7 +162,6 @@ public class PageComponentController {
 		
 	public static void updateLinkList(Context ctx) {
 		final ResultBase result = new ResultBase();
-		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 		final ReqPCLinkList req = ctx.bodyAsClass(ReqPCLinkList.class);	
 		final String pageComponentId = ctx.pathParam("pageComponentId");
 		
@@ -176,7 +169,7 @@ public class PageComponentController {
 		//no validation for now.
 		
 		try {
-			if(Env.pageComponentDao.updatePageComponent(accountId, pageComponentId, 
+			if(Env.pageComponentDao.updatePageComponent(pageComponentId, 
 					mapper.writeValueAsString(req.data()),req.order(),req.enabled() )) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 				logger.info("Data updated.");
@@ -195,7 +188,6 @@ public class PageComponentController {
 	
 	public static void updateTextBox(Context ctx) {
 		final ResultBase result = new ResultBase();
-		final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 		final ReqPCTextBox req = ctx.bodyAsClass(ReqPCTextBox.class);	
 		final String pageComponentId = ctx.pathParam("pageComponentId");
 		
@@ -203,7 +195,7 @@ public class PageComponentController {
 		//no validation for now.
 		
 		try {
-			if(Env.pageComponentDao.updatePageComponent(accountId, pageComponentId, 
+			if(Env.pageComponentDao.updatePageComponent(pageComponentId, 
 					mapper.writeValueAsString(req.data()),req.order(),req.enabled() )) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 				logger.info("Data updated.");

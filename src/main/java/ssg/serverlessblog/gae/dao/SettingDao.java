@@ -38,13 +38,11 @@ public class SettingDao implements SettingDaoInt{
 	}
 	
 	@Override
-	public void updateSetting(String accountId, Setting setting) throws Exception{
+	public void updateSetting(Setting setting) throws Exception{
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
 			//Search document where account id and setting id matches.
 			final Query query = collection()					
-					.whereEqualTo(SettingDoc.field_ref_account_id, accountDocRef)
 					.whereEqualTo(FieldPath.documentId(), setting.settingId());
 			
 			//get Settings document
@@ -72,13 +70,10 @@ public class SettingDao implements SettingDaoInt{
 	}
 	
 	@Override
-	public Optional<CloudDocument> getSetting(String accountId) throws Exception{
+	public Optional<CloudDocument> getSetting() throws Exception{
 		Optional<CloudDocument> result = Optional.empty();
 		try {			
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
-			
-			final Query query = collection()					
-					.whereEqualTo(SettingDoc.field_ref_account_id, accountDocRef);
+			final Query query = collection();
 			
 			//get Settings document
 			final ApiFuture<QuerySnapshot> future = query.get();

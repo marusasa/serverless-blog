@@ -45,10 +45,9 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 	
 	@Override
-	public boolean deletePageComponent(String accountId, String pageComponentId) throws Exception {
+	public boolean deletePageComponent( String pageComponentId) throws Exception {
 		var result = false;
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final DocumentReference docRef = collection().document(pageComponentId);
 			
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
@@ -58,11 +57,6 @@ public class PageComponentDao implements PageComponentDaoInt {
 				return result;
 			}
 			
-			final DocumentReference refAccount = (DocumentReference)document.get(PageComponentDoc.field_ref_account_id); 
-			if(!refAccount.equals(accountDocRef)) {
-				logger.warn("Article %s not authorized with account %s".formatted(pageComponentId,accountId));
-				return result;
-			}		
 			
 			final ApiFuture<WriteResult> writeResult = docRef.delete();
 			writeResult.get();
@@ -74,10 +68,9 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 
 	@Override
-	public Optional<CloudDocument> getPageComponent(String accountId, String pageComponentId) throws Exception {
+	public Optional<CloudDocument> getPageComponent(String pageComponentId) throws Exception {
 		Optional<CloudDocument> result = Optional.empty();
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
 			final DocumentReference docRef = collection().document(pageComponentId);
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
@@ -87,15 +80,9 @@ public class PageComponentDao implements PageComponentDaoInt {
 				logger.warn("PageComponent document not found: %s".formatted(pageComponentId));
 				return result;
 			}
+						
+			result = Optional.of(new CloudDocument(document.getId(), document.getData()));
 			
-			final DocumentReference refAccount = (DocumentReference)document.get(PageComponentDoc.field_ref_account_id); 
-			if(refAccount.equals(accountDocRef)) {
-				//make sure this document belongs to this user.
-				result = Optional.of(new CloudDocument(document.getId(), document.getData()));
-			}else {
-				logger.warn("PageComponent %s not authorized with account %s".formatted(pageComponentId,accountId));
-				return result;
-			}
 		}catch(Exception e) {
 			throw e;
 		}
@@ -104,13 +91,11 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 	
 	@Override
-	public List<CloudDocument> getPageComponents(String accountId) throws Exception {
+	public List<CloudDocument> getPageComponents() throws Exception {
 		final List<CloudDocument> result = new ArrayList<>();
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
 			final Query query = collection()
-					.whereEqualTo(ArticleDoc.field_ref_account_id, accountDocRef)
 					.orderBy(PageComponentDoc.field_view_order);
 			
 			final ApiFuture<QuerySnapshot> future = query.get();
@@ -127,11 +112,10 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 
 	@Override
-	public boolean updatePageComponent(String accountId, String pageComponentId, String json,
+	public boolean updatePageComponent(String pageComponentId, String json,
 			long order, boolean enabled) throws Exception {
 		var result = false;
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			final DocumentReference docRef = collection().document(pageComponentId);
 			
 			final ApiFuture<DocumentSnapshot> future = docRef.get();
@@ -140,21 +124,17 @@ public class PageComponentDao implements PageComponentDaoInt {
 				logger.warn("PageComponent document not found: %s".formatted(pageComponentId));
 				return result;
 			}
-			
-			final DocumentReference refAccount = (DocumentReference)document.get(PageComponentDoc.field_ref_account_id); 
-			if(refAccount.equals(accountDocRef)) {
-				//update document
-				final Map<String, Object> updates = new HashMap<>();
-				updates.put(PageComponentDoc.field_json, json);
-				updates.put(PageComponentDoc.field_view_order, order);
-				updates.put(PageComponentDoc.field_enabled, enabled);
-				updates.put(PageComponentDoc.field_updated_at, Timestamp.now());
-				final ApiFuture<WriteResult> writeResult = docRef.update(updates);
-			    writeResult.get();				
-				result = true;
-			}else {
-				logger.warn("PageComponent %s not authorized with account %s".formatted(pageComponentId,accountId));
-			}
+			 
+			//update document
+			final Map<String, Object> updates = new HashMap<>();
+			updates.put(PageComponentDoc.field_json, json);
+			updates.put(PageComponentDoc.field_view_order, order);
+			updates.put(PageComponentDoc.field_enabled, enabled);
+			updates.put(PageComponentDoc.field_updated_at, Timestamp.now());
+			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
+		    writeResult.get();				
+			result = true;
+		
 		}catch(Exception e) {
 			throw e;
 		}
@@ -162,14 +142,12 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 
 	@Override
-	public String createPageComponent(String accountId, String type, String json, long order, boolean enabled) throws Exception {
+	public String createPageComponent(String type, String json, long order, boolean enabled) throws Exception {
 		var newId = "";
 		try {
-			final DocumentReference accountDocRef = AccountDao.getAccountDocRef(accountId);
 			
 			//add article to database
 			final Map<String, Object> data = new HashMap<>();
-			data.put(PageComponentDoc.field_ref_account_id,accountDocRef);
 			data.put(PageComponentDoc.field_comp_type, type);
 			data.put(PageComponentDoc.field_json, json);
 			data.put(PageComponentDoc.field_view_order, order);

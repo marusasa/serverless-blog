@@ -17,7 +17,6 @@ public class UserDoc {
 	 */
 	public final static String id_ref_name = "user_id"; 
 
-	public final static String field_ref_account_id = "ref_account_id";
 	public final static String field_password = "password";
 	public final static String field_salt = "salt";
 	public final static String field_created_at = "created_at";

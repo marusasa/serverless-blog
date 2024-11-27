@@ -205,9 +205,9 @@ public class BlogMain {
 		});
 		
 		//Make sure datastore is ready.
-		if(!AppProperties.getBoolean("env.skip-first-run")) {
-			firstRun();		
-		}
+//		if(!AppProperties.getBoolean("env.skip-first-run")) {
+//			firstRun();		
+//		}
 		
 		app.start(8080);
 		
@@ -225,16 +225,17 @@ public class BlogMain {
 	    return sessionHandler;
 	}
 	
+	
 	/**
 	 * This method gets invoked every time the server starts.
 	 * It checks certain datastore existence, if it  doesn't exists,
 	 * then it will create some initial records needed for the plataform to 
 	 * run.
 	 */
+	/*
 	private static void firstRun() {
 		try {
 			//check if account record exists
-			final int accountsCount = Env.systemDao.getAccountsSize();
 			if(accountsCount == 0) {
 				//Account data doesn't exists. Create the default account.
 				Env.systemDao.createInitialSystemData();
@@ -267,5 +268,6 @@ public class BlogMain {
 			logger.info("***************************************************************");
 		}			
 	}
+	*/
 	
 }

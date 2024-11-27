@@ -18,7 +18,6 @@ public class SessionDoc {
 	public final static String field_accessed_at = "accessed_at";
 	public final static String field_username = "username";
 	public final static String field_ref_user_id = "ref_user_id";
-	public final static String field_ref_account_id = "ref_account_id";
 	
 
 }

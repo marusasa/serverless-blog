@@ -10,7 +10,6 @@ import io.javalin.http.Context;
 import io.javalin.http.Handler;
 import ssg.serverlessblog.data_json.LoginForm;
 import ssg.serverlessblog.data_json.ResultBase;
-import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.UserDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
@@ -27,13 +26,12 @@ public class LoginHandler implements Handler {
 		final ResultBase result = new ResultBase();
 		try{
 			final LoginForm login = ctx.bodyAsClass(LoginForm.class);			
-			final Optional<String> opOfAccountId = Env.userDao.login(login.username(), login.password());
+			final boolean loggedIn = Env.userDao.login(login.username(), login.password());
 			
-			if(opOfAccountId.isPresent()){
+			if(loggedIn){
 				//put user name in the session.
 				ctx.sessionAttribute(UserDoc.id_ref_name,login.username());
 				//put account id in the session.
-				ctx.sessionAttribute(AccountDoc.id_ref_name, opOfAccountId.get());
 				result.setResult(AppConst.RESULT_SUCCESS);	
 			}else {
 				result.getMessages().add("Login failed.");

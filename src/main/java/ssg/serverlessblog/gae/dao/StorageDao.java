@@ -26,7 +26,7 @@ public class StorageDao implements StorageDaoInt {
 	@Override
 	public void addFile(String fileLoc, String fileName, InputStream content) throws Exception {
 		Storage storage = StorageOptions.getDefaultInstance().getService();
-		final Optional<CloudDocument> setting = Env.settingDao.getSetting(Env.getAccountIdToUse(null));
+		final Optional<CloudDocument> setting = Env.settingDao.getSetting();
 		final String bucketName = setting.get().getString(SettingDoc.field_gae_storage_bucket);
 	    BlobId blobId = BlobId.of(bucketName, fileLoc + "/" + fileName);    
 	    BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
@@ -40,7 +40,7 @@ public class StorageDao implements StorageDaoInt {
 		List<ImageInfo> result = new ArrayList<>();
 		Storage storage = StorageOptions.getDefaultInstance().getService();
 		String directoryPrefix = "ARTICLES/" + articleId + "/";
-		final Optional<CloudDocument> setting = Env.settingDao.getSetting(Env.getAccountIdToUse(null));
+		final Optional<CloudDocument> setting = Env.settingDao.getSetting();
 		final String bucketName = setting.get().getString(SettingDoc.field_gae_storage_bucket);
 		Page<Blob> blobs = storage.list(bucketName,
 				Storage.BlobListOption.prefix(directoryPrefix), Storage.BlobListOption.currentDirectory());

@@ -12,7 +12,6 @@ public class PageComponentDoc {
 	 */
 	public final static String collection = "page-components";
 
-	public final static String field_ref_account_id = "ref_account_id";
 	public final static String field_comp_type = "comp_type";
 	public final static String field_json = "json";
 	public final static String field_view_order = "view_order";

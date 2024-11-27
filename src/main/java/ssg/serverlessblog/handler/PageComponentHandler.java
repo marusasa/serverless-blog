@@ -29,8 +29,7 @@ public class PageComponentHandler implements Handler {
 		try {
 			//Currently multi-tenant is not part of the design.
 			//However, account id is used for possible future implementation.
-			final String accountId = Env.getAccountIdToUse(ctx);
-			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents(accountId);
+			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents();
 			
 			list.forEach(document -> {
 				if(document.getBoolean(PageComponentDoc.field_enabled)) {

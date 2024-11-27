@@ -10,7 +10,6 @@ import io.javalin.http.Context;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultSetting;
 import ssg.serverlessblog.data_json.Setting;
-import ssg.serverlessblog.documentref.AccountDoc;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
@@ -26,8 +25,7 @@ public class SettingController {
 	public static void get(Context ctx) {
 		final ResultSetting result = new ResultSetting();
 		try {
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
-			final Optional<CloudDocument> op = Env.settingDao.getSetting(accountId);
+			final Optional<CloudDocument> op = Env.settingDao.getSetting();
 			if(op.isPresent()) {
 				final CloudDocument doc = op.get();
 				final var s = new Setting.Builder()
@@ -50,10 +48,9 @@ public class SettingController {
 	public static void update(Context ctx) {
 		final ResultBase result = new ResultBase();
 		try {
-			final Setting setting = ctx.bodyAsClass(Setting.class);			
-			final String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);			
+			final Setting setting = ctx.bodyAsClass(Setting.class);				
 			
-			Env.settingDao.updateSetting(accountId, setting);
+			Env.settingDao.updateSetting( setting);
 			result.setResult(AppConst.RESULT_SUCCESS);
 			logger.info("Setting updated - id:%s".formatted(setting.settingId()));			
 		}catch(Exception e) {

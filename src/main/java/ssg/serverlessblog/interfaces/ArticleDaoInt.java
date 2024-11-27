@@ -13,16 +13,16 @@ import ssg.serverlessblog.util.CloudDocument;
  * (At the moment there is only one implementation.
  */
 public interface ArticleDaoInt {
-	public String createArticle(String accountId,Article article) throws Exception;
-	public Optional<CloudDocument> getArticleForManage(String accountId,String articleId) throws Exception;
+	public String createArticle(Article article) throws Exception;
+	public Optional<CloudDocument> getArticleForManage(String articleId) throws Exception;
 	public Optional<CloudDocument> getArticle(String articleId) throws Exception;
-	public boolean updateArticle(String accountId,Article article) throws Exception;
-	public List<CloudDocument> getArticlesForManage(String accountId) throws Exception;
-	public List<CloudDocument> getArticlesForBlog(String accountId, long publishedAtMillisec, int countPerPage) throws Exception;
-	public List<CloudDocument> getArticlesForBlogAll(String accountId) throws Exception;
-	public long getArticlesForBlogTotalCount(String accountId) throws Exception;
-	public boolean deleteArticle(String accountId, String articleId) throws Exception;	
-	public String generateAiSummary(String accountId, String articleId) throws Exception;
+	public boolean updateArticle(Article article) throws Exception;
+	public List<CloudDocument> getArticlesForManage() throws Exception;
+	public List<CloudDocument> getArticlesForBlog( long publishedAtMillisec, int countPerPage) throws Exception;
+	public List<CloudDocument> getArticlesForBlogAll() throws Exception;
+	public long getArticlesForBlogTotalCount() throws Exception;
+	public boolean deleteArticle(String articleId) throws Exception;	
+	public String generateAiSummary(String articleId) throws Exception;
 	public long incrementArticleLike(String articleId) throws Exception;
 	public boolean isArticleExists(String articleId) throws Exception;
 }

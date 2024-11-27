@@ -32,8 +32,7 @@ public class SitemapXmlHandler implements Handler {
 		logger.info("sitemap.xml invoked.");
 		ctx.res().setContentType("application/xml;charset=UTF-8");
 		
-		var accountId = Env.getAccountIdToUse(ctx);
-		final List<CloudDocument> documents = Env.articleDao.getArticlesForBlogAll(accountId);						
+		final List<CloudDocument> documents = Env.articleDao.getArticlesForBlogAll();						
 		
 		var result = new StringBuilder();
 		result.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");

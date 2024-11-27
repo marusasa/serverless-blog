@@ -13,6 +13,6 @@ import ssg.serverlessblog.util.CloudDocument;
  */
 public interface SettingDaoInt {
 
-	public Optional<CloudDocument> getSetting(String accountId) throws Exception;	
-	public void updateSetting(String accountId, Setting setting) throws Exception;
+	public Optional<CloudDocument> getSetting() throws Exception;	
+	public void updateSetting( Setting setting) throws Exception;
 }

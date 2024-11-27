@@ -12,7 +12,6 @@ public class ArticleDoc {
 	 */
 	public final static String collection = "articles";
 
-	public final static String field_ref_account_id = "ref_account_id";
 	public final static String field_ref_user_id = "ref_user_id";
 	public final static String field_title = "title";
 	public final static String field_body = "body";

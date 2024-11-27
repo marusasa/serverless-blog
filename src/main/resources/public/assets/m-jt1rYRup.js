@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
 var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-import { j as jsxRuntimeExports, r as reactExports, f as useNavigate, L as Loading, M as Markdown, c as remarkGfm, g as useLocation, C as Constants, t, O as Outlet, a as Link, e as createRoot, B as BrowserRouter, h as Routes, i as Route } from "./index-Bv8Uz6c5.js";
+import { j as jsxRuntimeExports, r as reactExports, f as useNavigate, L as Loading, M as Markdown, c as remarkGfm, g as useLocation, C as Constants, t, O as Outlet, a as Link, e as createRoot, B as BrowserRouter, h as Routes, i as Route } from "./index-BfZCrIl1.js";
 function FormTitle({ text }) {
   return /* @__PURE__ */ jsxRuntimeExports.jsx("h2", { className: "text-2xl mb-4", children: text });
 }
@@ -17311,8 +17311,7 @@ function AnalyticsPageEngagement() {
       selector: (row) => row.average,
       sortable: true,
       width: "10em",
-      center: true,
-      wrap: true
+      center: true
     }
   ];
   const handleRefresh = (e) => {
