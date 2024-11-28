@@ -45,7 +45,7 @@ function PostPage() {
 			});
 	}, []);
 	
-	const handleArticleClick = (event) => {
+	const handleArticleClick = (event: React.MouseEvent) => {
 		if (event.target.tagName === "A") {
 			if (event.target.getAttribute("href").toLowerCase().startsWith('http')) {
 				// Prevent the default link behavior (navigation)

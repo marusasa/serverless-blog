@@ -84,7 +84,6 @@ public class AnalyticsController {
 				//create place holder in result.
 				final List<Long> actualList = new ArrayList<>();
 				final List<Long> allList = new ArrayList<>();
-				//String accountId = ctx.sessionAttribute(AccountDoc.id_ref_name);
 				final List<CloudDocument> list = Env.analyticsDao.getDailyVisits(year, month);
 				list.forEach(doc -> {
 					actualList.add(doc.getLong(DailyVisitsDoc.field_count_actual));					

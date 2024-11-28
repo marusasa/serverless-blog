@@ -97,7 +97,7 @@ then the application was deployed and initialized successfully.
 
 - The initialization process should have created some data. Go to '(default)' datastore to verify the data created.
 
-# How to use images on you site.
+# How to use images on your site.
 
 1. Create a Cloud Storage bucket.
 

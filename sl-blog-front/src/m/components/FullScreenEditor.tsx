@@ -1,5 +1,5 @@
 import './FullScreenEditor.css'
-import {  forwardRef,useState } from 'react'
+import {  forwardRef,useState,useRef,useEffect } from 'react'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import {SubmitButton} from "../components/FormComp";
@@ -7,6 +7,8 @@ import ImageManager from './ImageManager';
 
 const FullScreenEditor  = forwardRef(function(props, ref) {
 	const [showImgMgr, setShowImgMgr] = useState(false);
+	const refArticleOuter = useRef(null);
+	const refTextrea = useRef(null);
 	
 	const close = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -22,7 +24,31 @@ const FullScreenEditor  = forwardRef(function(props, ref) {
 		}		
 		setShowImgMgr(false);			
 	};  
+	useEffect(() => {
+		refArticleOuter.current.addEventListener('click', handleArticleClick);
+	}, []);
+
+	useEffect(() => {
+		const scrollable1 = refTextrea.current;		
+		const scrollable2 = refArticleOuter.current;
+		syncScrollbars(scrollable1, scrollable2);
+	}, []);	
 	
+	
+	const handleArticleClick = (event) => {
+		if (event.target.tagName === "A") {
+			event.preventDefault(); 
+			window.open(event.target.href, '_blank');
+		}
+	};
+	
+	const syncScrollbars = (scrollable1, scrollable2) => {
+	  scrollable1.addEventListener('scroll', function() {
+	    const scrollPercentage = (scrollable1.scrollTop / (scrollable1.scrollHeight - scrollable1.clientHeight)) * 100;
+	    scrollable2.scrollTop = (scrollPercentage / 100) * (scrollable2.scrollHeight - scrollable2.clientHeight);
+	  });
+	}
+
 	
 	return (
 		<>
@@ -37,11 +63,11 @@ const FullScreenEditor  = forwardRef(function(props, ref) {
 								<span className="text-red-500 mt-1">{props.saveMsg}</span>
 							</div>
 							<textarea className="textarea textarea-bordered w-full" value={props.body}
-								rows={25}
+								rows={25} ref={refTextrea}
 								onChange={(e) => { props.setBody(e.target.value); props.setPostChanged(true); }}></textarea>
 						</div>
-						<div className="basis-1/2 h-full">
-							<Markdown className="prose max-w-none mx-6 reactMarkDown h-full overflow-auto"
+						<div className="basis-1/2 h-full overflow-auto" ref={refArticleOuter}>
+							<Markdown className="prose max-w-none mx-6 reactMarkDown h-full "								
 								remarkPlugins={[remarkGfm]}>{props.body}</Markdown>
 						</div>
 					</div>

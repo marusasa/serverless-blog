@@ -200,6 +200,8 @@ function ImageManager({ isOpen, onClose, articleId }) {
 }
 const FullScreenEditor = reactExports.forwardRef(function(props, ref) {
   const [showImgMgr, setShowImgMgr] = reactExports.useState(false);
+  const refArticleOuter = reactExports.useRef(null);
+  const refTextrea = reactExports.useRef(null);
   const close = (e) => {
     e.preventDefault();
     ref.current.close();
@@ -213,6 +215,26 @@ const FullScreenEditor = reactExports.forwardRef(function(props, ref) {
       e.preventDefault();
     }
     setShowImgMgr(false);
+  };
+  reactExports.useEffect(() => {
+    refArticleOuter.current.addEventListener("click", handleArticleClick);
+  }, []);
+  reactExports.useEffect(() => {
+    const scrollable1 = refTextrea.current;
+    const scrollable2 = refArticleOuter.current;
+    syncScrollbars(scrollable1, scrollable2);
+  }, []);
+  const handleArticleClick = (event) => {
+    if (event.target.tagName === "A") {
+      event.preventDefault();
+      window.open(event.target.href, "_blank");
+    }
+  };
+  const syncScrollbars = (scrollable1, scrollable2) => {
+    scrollable1.addEventListener("scroll", function() {
+      const scrollPercentage = scrollable1.scrollTop / (scrollable1.scrollHeight - scrollable1.clientHeight) * 100;
+      scrollable2.scrollTop = scrollPercentage / 100 * (scrollable2.scrollHeight - scrollable2.clientHeight);
+    });
   };
   return /* @__PURE__ */ jsxRuntimeExports.jsxs(jsxRuntimeExports.Fragment, { children: [
     /* @__PURE__ */ jsxRuntimeExports.jsx("dialog", { id: "full_screen_editor", className: "modal", ref, children: /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "modal-box w-full max-w-full h-lvh max-h-lvh rounded-none", children: /* @__PURE__ */ jsxRuntimeExports.jsxs("div", { className: "flex flex-row h-full", children: [
@@ -229,6 +251,7 @@ const FullScreenEditor = reactExports.forwardRef(function(props, ref) {
             className: "textarea textarea-bordered w-full",
             value: props.body,
             rows: 25,
+            ref: refTextrea,
             onChange: (e) => {
               props.setBody(e.target.value);
               props.setPostChanged(true);
@@ -236,10 +259,10 @@ const FullScreenEditor = reactExports.forwardRef(function(props, ref) {
           }
         )
       ] }),
-      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "basis-1/2 h-full", children: /* @__PURE__ */ jsxRuntimeExports.jsx(
+      /* @__PURE__ */ jsxRuntimeExports.jsx("div", { className: "basis-1/2 h-full overflow-auto", ref: refArticleOuter, children: /* @__PURE__ */ jsxRuntimeExports.jsx(
         Markdown,
         {
-          className: "prose max-w-none mx-6 reactMarkDown h-full overflow-auto",
+          className: "prose max-w-none mx-6 reactMarkDown h-full ",
           remarkPlugins: [remarkGfm],
           children: props.body
         }
