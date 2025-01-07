@@ -102,7 +102,7 @@
 				<artifactId>appengine-maven-plugin</artifactId>
 				<version>2.7.0</version>
 				<configuration>
-					<version>0-1-1</version>
+					<version>0-1-2</version>
 					<!-- 
 						set your google cloud project id here.
 						Or set is as system property.

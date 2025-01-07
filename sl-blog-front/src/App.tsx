@@ -57,7 +57,7 @@ function App() {
 						<div className="flex md:hidden">
 							<ShowIcon iconUrl={iconUrl}/>
 							<a className="link link-accent mt-2" onClick={toggleShowAboutMe}
-									>{showAboutMe? 'Back to Posts':'Show About Me'}</a>
+									>{showAboutMe? 'Back to Posts':'Show About Me + More'}</a>
 						</div>
 					</div>
 					<div className="grid grid-cols-6">

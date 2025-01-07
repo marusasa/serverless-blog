@@ -7,6 +7,8 @@ import PostList from './routes/PostList';
 import SettingEdit from './routes/SettingEdit';
 import PageCompList from './routes/PageCompList';
 import PageCompEdit from './routes/PageCompEdit';
+import TagList from './routes/TagList';
+import TagEdit from './routes/TagEdit';
 import AnalyticsDailyVisits from './routes/AnalyticsDailyVisits';
 import AnalyticsPageEngagement from './routes/AnalyticsPageEngagement';
 
@@ -27,6 +29,8 @@ createRoot(document.getElementById('root')!).render(
 				<Route path="setting" element={<SettingEdit />} />
 				<Route path="components" element={<PageCompList />} />
 				<Route path="components/edit" element={<PageCompEdit />} />
+				<Route path="tags" element={<TagList />} />
+				<Route path="tags/edit" element={<TagEdit />} />
 				<Route path="analytics/daily-visits" element={<AnalyticsDailyVisits/>} />
 				<Route path="analytics/page-engagement" element={<AnalyticsPageEngagement/>} />				
 			</Route>

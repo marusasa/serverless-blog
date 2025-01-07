@@ -82,12 +82,17 @@ public class SystemDao implements SystemDaoInt {
 			{
 				//profile picture
 				Env.pageComponentDao.createPageComponent(AppConst.PC_TYPE_PROFILE_PIC,
-						mapper.writeValueAsString(SampleDataUtil.getSampleProfilePic()), 10L, true);				
+						mapper.writeValueAsString(SampleDataUtil.getSampleProfilePic()), 20L, true);				
 			}
 			{
 				//Link List
 				Env.pageComponentDao.createPageComponent(AppConst.PC_TYPE_LINK_LIST,
-						mapper.writeValueAsString(SampleDataUtil.getSampleLinkList()), 20L, true);
+						mapper.writeValueAsString(SampleDataUtil.getSampleLinkList()), 30L, true);
+			}
+			{
+				//Tags
+				Env.pageComponentDao.createPageComponent(AppConst.PC_TYPE_TAGS,
+						"{}", 10L, true);
 			}
 		}catch(Exception e) {
 			throw e;

@@ -27,17 +27,21 @@ import ssg.serverlessblog.controller.ArticleController;
 import ssg.serverlessblog.controller.LoginController;
 import ssg.serverlessblog.controller.PageComponentController;
 import ssg.serverlessblog.controller.SettingController;
+import ssg.serverlessblog.controller.TagController;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.documentref.UserDoc;
 import ssg.serverlessblog.handler.AnalyticsHandler;
 import ssg.serverlessblog.handler.ArticleGet;
 import ssg.serverlessblog.handler.ArticleGetList;
+import ssg.serverlessblog.handler.ArticleGetListByTag;
 import ssg.serverlessblog.handler.ArticleLikeUpdate;
+import ssg.serverlessblog.handler.AtomFeedXmlHandler;
 import ssg.serverlessblog.handler.BasicInfoHandler;
 import ssg.serverlessblog.handler.LoginHandler;
 import ssg.serverlessblog.handler.PageComponentHandler;
 import ssg.serverlessblog.handler.ScheduledAnalyticsDailyProcess;
 import ssg.serverlessblog.handler.SitemapXmlHandler;
+import ssg.serverlessblog.handler.TagListHandler;
 import ssg.serverlessblog.util.AppProperties;
 
 /**
@@ -130,6 +134,18 @@ public class BlogMain {
 							path("/text-box",() -> {
 								patch(PageComponentController::updateTextBox);
 							});
+							path("/tags",() -> {
+								patch(PageComponentController::updateTags);
+							});
+						});
+					});
+					path("/tags", () ->{
+						get(TagController::getList);
+						post(TagController::createNewDefault);
+						path("/{tagId}",() -> {
+							get(TagController::getItem);
+							delete(TagController::deleteItem);
+							patch(TagController::updateTag);							
 						});
 					});
 					path("/analytics",() -> {
@@ -151,13 +167,16 @@ public class BlogMain {
 		app.get("/basic-info", new BasicInfoHandler());		
 		app.get("/articles", new ArticleGetList());
 		app.get("/articles/page/{start-after}", new ArticleGetList());
+		app.get("/articles/tag/{tagId}", new ArticleGetListByTag());
 		app.get("/articles/{articleId}", new ArticleGet());
 		app.patch("/articles/{articleId}/like", new ArticleLikeUpdate());
 		app.post("/login", new LoginHandler());
 		app.get("/components", new PageComponentHandler());
+		app.get("/tags", new TagListHandler());
 		app.post("/analytics", new AnalyticsHandler());
 		app.get("/scheduled/daily-process", new ScheduledAnalyticsDailyProcess());	
 		app.get("/sitemap.xml", new SitemapXmlHandler());
+		app.get("/feed", new AtomFeedXmlHandler());
 		
 		/*
 		 * Redirect some path to index.
@@ -168,6 +187,7 @@ public class BlogMain {
 			final String indexHtml = new BufferedReader(isr)
 					   .lines().collect(Collectors.joining("\n"));
 			app.get("/post/*", ctx -> {ctx.html(indexHtml);});
+			app.get("/tag/*", ctx -> {ctx.html(indexHtml);});
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}

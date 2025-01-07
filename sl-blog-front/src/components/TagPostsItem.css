@@ -1,0 +1,6 @@
+a.tag-link{
+	cursor: pointer;
+}
+a.tag-link:hover{
+	text-decoration-line: underline;
+}

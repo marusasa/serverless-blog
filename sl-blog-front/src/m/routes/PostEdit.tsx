@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import {SubmitButton, FormTitle} from "../components/FormComp";
 import FullScreenEditor from '../components/FullScreenEditor';
+import Select from 'react-select'
 
 function PostEdit() {
 	const navigate = useNavigate();
@@ -13,7 +14,10 @@ function PostEdit() {
 	const [body, setBody] = useState('');
 	const [status, setStatus] = useState('draft'); // Set initial value
 	const [aiSummary, setAiSummary] = useState('');
+	const [tagIds, setTagIds] = useState([]);
+	const [selectedTagIds, setSelectedTagIds] = useState({});
 	const [loaded, setLoaded] = useState(false);
+	const [loadedTags, setLoadedTags] = useState(false);
 	const [inSave,setInSave] = useState(false);
 	const [inPubSave,setInPubSave] = useState(false);
 	const [inDelete,setInDelete] = useState(false);
@@ -21,6 +25,7 @@ function PostEdit() {
 	const [postChanged, setPostChanged] = useState(false);
 	const dialogRef = useRef(null);
 	const [saveMsg,setSaveMsg] = useState('');
+	const [options,setOptions] = useState([]);
 	
 	//first load article
 	useEffect(() => {
@@ -32,6 +37,15 @@ function PostEdit() {
 					setBody(data.article.body);
 					setStatus(data.article.status);
 					setAiSummary(data.article.summary);
+					setTagIds(data.article.tagIds);
+					const defaultListIds = [];
+					for (let i = 0; i < data.article.tagIds.length; i++) {
+						const o = {};
+						o.label = data.article.tagNames[i];
+						o.value = data.article.tagIds[i];
+						defaultListIds.push(o);
+					}
+					setSelectedTagIds(defaultListIds);
 					setLoaded(true);
 				} else {
 					alert(JSON.stringify(data.messages));
@@ -41,6 +55,27 @@ function PostEdit() {
 				console.log(err.message);
 				alert('Failed to load article.');
 			});
+		fetch('/mng/tags')
+			.then((response) => response.json())
+			.then((data) => {
+				if (data.result == 'success') {
+					const optionList = [];
+					data.tags.forEach((tag) => {
+						const o = {};
+						o.label = tag.name;
+						o.value = tag.tagId;
+						optionList.push(o);
+					});
+					setOptions(optionList);
+					setLoadedTags(true);
+				} else {
+					alert(JSON.stringify(data.messages));
+				}
+			})
+			.catch((err) => {
+				console.log(err.message);
+				alert('Failed to load tags.');
+			});
 	}, []);
 		
 		
@@ -48,7 +83,7 @@ function PostEdit() {
 		await fetch('/mng/articles/', {
 			method: 'PATCH',
 			body: JSON.stringify({
-				title: title, body: body, status: status, articleId: articleId, summary: aiSummary
+				title: title, body: body, status: status, articleId: articleId, summary: aiSummary, tagIds: tagIds
 			}),
 			headers: {
 				'Content-type': 'application/json; charset=UTF-8',
@@ -184,11 +219,19 @@ function PostEdit() {
 		e.preventDefault();
 		dialogRef.current.showModal();			
 	};
+	const handleTagChange = (selected: HTMLSelectElement[]) => {
+		const tgIds:string[] = [];
+		selected.forEach(o => {
+			tgIds.push(o.value);
+		});
+		setTagIds(tgIds);
+		setSelectedTagIds(selected);
+	};
 	return (
 		<>			
 			<FormTitle text={"Edit Post : " + (status==='draft'?'Draft':'Published')}/>
-			<Loading loaded={loaded}/>
-			<div className={loaded ? 'visible' : 'invisible'}>
+			<Loading loaded={loaded && loadedTags}/>
+			<div className={(loaded && loadedTags) ? 'visible' : 'invisible'}>
 				<form>
 					<div className='flex'>
 						<SubmitButton text="Save" inProcess={inSave} callback={handleSave} classes="btn-sm btn-primary"/>
@@ -215,6 +258,14 @@ function PostEdit() {
 									callback={handleGenAiSummary} classes="btn-sm btn-outline btn-secondary"/>
 							<button className={aiSummary === ""?'hidden':'' + " btn btn-sm btn-outline btn-secondary mr-3"}
 									onClick={handleClearAiSummary}>Clear AI Summary</button>
+						</div>
+					</div>
+					<div className="mb-4">
+						<div className="label">
+							<span className="label-text">Tags:</span>
+						</div>
+						<div>
+							<Select options={options} isMulti value={selectedTagIds} onChange={handleTagChange}/>
 						</div>
 					</div>
 					<label className="form-control mb-4">

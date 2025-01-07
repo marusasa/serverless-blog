@@ -14,6 +14,7 @@ import ssg.serverlessblog.data_json.PCProfilePic;
 import ssg.serverlessblog.data_json.ReqPCLinkList;
 import ssg.serverlessblog.data_json.ReqPCNew;
 import ssg.serverlessblog.data_json.ReqPCProfilePic;
+import ssg.serverlessblog.data_json.ReqPCTags;
 import ssg.serverlessblog.data_json.ReqPCTextBox;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultPageComponent;
@@ -150,6 +151,12 @@ public class PageComponentController {
 					result.setResult(AppConst.RESULT_SUCCESS);
 					logger.info("Default Text Box created.");
 					break;
+				case AppConst.PC_TYPE_TAGS:
+					Env.pageComponentDao.createPageComponent( AppConst.PC_TYPE_TAGS,
+							"{}", 103L, false);
+					result.setResult(AppConst.RESULT_SUCCESS);
+					logger.info("Default Tags created.");
+					break;
 				default:
 					throw new Exception("Unknown type for createNewDefault: %s".formatted(req.type()));
 			}
@@ -197,6 +204,31 @@ public class PageComponentController {
 		try {
 			if(Env.pageComponentDao.updatePageComponent(pageComponentId, 
 					mapper.writeValueAsString(req.data()),req.order(),req.enabled() )) {
+				result.setResult(AppConst.RESULT_SUCCESS);
+				logger.info("Data updated.");
+			}else {
+				result.getMessages().add("Data not saved.");
+			}
+			
+		}catch(Exception e) {
+			logger.error("Error updating data.", e);
+			result.getMessages().add("Error updating data.");
+		}
+		 
+		ctx.json(result);		
+    }
+	
+	public static void updateTags(Context ctx) {
+		final ResultBase result = new ResultBase();
+		final ReqPCTags req = ctx.bodyAsClass(ReqPCTags.class);	
+		final String pageComponentId = ctx.pathParam("pageComponentId");
+		
+		//validation
+		//no validation for now.
+		
+		try {
+			if(Env.pageComponentDao.updatePageComponent(pageComponentId, 
+					"{}",req.order(),req.enabled() )) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 				logger.info("Data updated.");
 			}else {

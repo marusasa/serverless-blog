@@ -31,8 +31,12 @@ public class FirestoreDbUtil implements DataUtilInt {
 		//toString() produces '2024-10-25T04:36:17.743000000Z', change this to
 		//'2024-10-25T04:36:17.743Z', which is UTC timezone compatible
 		//in Javascript.
-		final var result = ts.toString().substring(0, 23) + "Z";
-		return result;
+		if(ts != null) {
+			final var result = ts.toString().substring(0, 23) + "Z";
+			return result;
+		}else {
+			return "";
+		}
 	}
 	
 

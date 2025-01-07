@@ -20,9 +20,12 @@ public interface ArticleDaoInt {
 	public List<CloudDocument> getArticlesForManage() throws Exception;
 	public List<CloudDocument> getArticlesForBlog( long publishedAtMillisec, int countPerPage) throws Exception;
 	public List<CloudDocument> getArticlesForBlogAll() throws Exception;
+	public List<CloudDocument> getArticlesByTag(String tagId) throws Exception;
 	public long getArticlesForBlogTotalCount() throws Exception;
 	public boolean deleteArticle(String articleId) throws Exception;	
 	public String generateAiSummary(String articleId) throws Exception;
 	public long incrementArticleLike(String articleId) throws Exception;
 	public boolean isArticleExists(String articleId) throws Exception;
+	public List<CloudDocument> getArticleTags(String articleId) throws Exception;
+	public boolean updateArticleTag(String articleId, List<String> tagIds) throws Exception;
 }

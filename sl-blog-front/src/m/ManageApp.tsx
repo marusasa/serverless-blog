@@ -55,6 +55,7 @@ function ManageApp() {
 							<ul className="menu bg-base-200 text-base-content min-h-full w-80 p-4">
 								<li><Link to="/m/posts">Posts</Link></li>
 								<li><Link to="/m/components">Page Components</Link></li>
+								<li><Link to="/m/tags">Tags</Link></li>
 								<li><Link to="/m/setting">Setting</Link></li>
 								<li className='pl-4'>------------</li>
 								<li><Link to="/m/analytics/daily-visits">Daily Visits</Link></li>

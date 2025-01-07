@@ -1,12 +1,9 @@
 package ssg.serverlessblog.system;
 
-import java.util.Optional;
-
 import org.eclipse.jetty.server.session.SessionDataStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.javalin.http.Context;
 import ssg.serverlessblog.interfaces.AnalyticsDaoInt;
 import ssg.serverlessblog.interfaces.ArticleDaoInt;
 import ssg.serverlessblog.interfaces.DataUtilInt;
@@ -14,8 +11,8 @@ import ssg.serverlessblog.interfaces.PageComponentDaoInt;
 import ssg.serverlessblog.interfaces.SettingDaoInt;
 import ssg.serverlessblog.interfaces.StorageDaoInt;
 import ssg.serverlessblog.interfaces.SystemDaoInt;
+import ssg.serverlessblog.interfaces.TagDaoInt;
 import ssg.serverlessblog.interfaces.UserDaoInt;
-import ssg.serverlessblog.util.AppProperties;
 import ssg.serverlessblog.util.CloudDocument;
 
 /**
@@ -30,7 +27,6 @@ public class Env {
 	static Logger logger = LoggerFactory.getLogger(Env.class);
 	
 	static final boolean isGae = isClassExists("ssg.serverlessblog.gae.dao.SettingDao");
-	private static Optional<String> singleTenantAccountId = Optional.empty();
 	
 	static public SettingDaoInt settingDao = null; 
 	static public ArticleDaoInt articleDao = null;
@@ -41,6 +37,7 @@ public class Env {
 	static public SessionDataStore noSqlSessionDataStore = null;
 	static public AnalyticsDaoInt analyticsDao = null;
 	static public StorageDaoInt storageDao = null;
+	static public TagDaoInt tagDao = null;
 	
 	static {
 		try {
@@ -55,6 +52,7 @@ public class Env {
 				noSqlSessionDataStore = (SessionDataStore)getClassObject("ssg.serverlessblog.gae.util.FirestoreDataStore");
 				analyticsDao = (AnalyticsDaoInt)getClassObject("ssg.serverlessblog.gae.dao.AnalyticsDao");
 				storageDao = (StorageDaoInt)getClassObject("ssg.serverlessblog.gae.dao.StorageDao");
+				tagDao = (TagDaoInt)getClassObject("ssg.serverlessblog.gae.dao.TagDao");
 			}
 		}catch(Exception e) {
 			logger.error("Error loading environment classes.",e);

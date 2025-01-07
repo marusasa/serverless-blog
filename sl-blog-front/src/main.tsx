@@ -4,6 +4,7 @@ import { RouterProvider, createBrowserRouter } from 'react-router-dom';
 import App from './App.tsx';
 import Posts from './components/Posts';
 import PostPage from './components/PostPage';
+import TagPosts from './components/TagPosts';
 import './index.css'
 
 //Do this instead of enabling auto-ssl on Javalin due to conflict with cron job.
@@ -23,6 +24,10 @@ const router = createBrowserRouter([
 		{
 			path: 'post/:postId',
 			element: <PostPage/>
+		},
+		{
+			path: 'tag/:tagId/*',
+			element: <TagPosts/>
 		}
 	]
   }

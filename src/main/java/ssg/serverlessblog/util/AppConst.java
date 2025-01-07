@@ -17,6 +17,7 @@ public class AppConst {
 	public static final String PC_TYPE_PROFILE_PIC = "ProfilePic";
 	public static final String PC_TYPE_LINK_LIST = "LinkList";
 	public static final String PC_TYPE_TEXT_BOX = "TextBox";
+	public static final String PC_TYPE_TAGS = "Tags";
 	
 	/**
 	 * JSON result

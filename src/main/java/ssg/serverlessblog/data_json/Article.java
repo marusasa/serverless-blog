@@ -1,5 +1,7 @@
 package ssg.serverlessblog.data_json;
 
+import java.util.List;
+
 /**
  * Class representing a blog entry.
  * On backend Java side, the classes are represented by the use of word 'Article'.
@@ -8,7 +10,7 @@ package ssg.serverlessblog.data_json;
  * This record type uses Builder Pattern since it has many fields.
  */
 public record Article (String title, String body, String status, String articleId, 
-		String createdAt, String publishedAt, String summary, long likes) {
+		String createdAt, String publishedAt, String summary, long likes, List<String> tagIds, List<String> tagNames) {
 	
 	public static class Builder {
         private String title;
@@ -19,6 +21,8 @@ public record Article (String title, String body, String status, String articleI
         private String publishedAt;
         private String summary;
         private long likes;
+        private List<String> tagIds;
+        private List<String> tagNames;
         
         public Builder likes(long likes) {
         	this.likes = likes;
@@ -59,9 +63,17 @@ public record Article (String title, String body, String status, String articleI
 			this.publishedAt = publishedAt;
 			return this;
 		}
-
+		public Builder tagIds(List<String> tagIds) {
+			this.tagIds = tagIds;
+			return this;
+		}
+		public Builder tagNames(List<String> tagNames) {
+			this.tagNames = tagNames;
+			return this;
+		}
+		
 		public Article build() {
-            return new Article(title,body,status,articleId,createdAt,publishedAt,summary,likes);
+            return new Article(title,body,status,articleId,createdAt,publishedAt,summary,likes,tagIds,tagNames);
         }
     }
 }

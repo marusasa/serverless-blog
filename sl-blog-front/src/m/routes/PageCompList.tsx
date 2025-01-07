@@ -106,6 +106,7 @@ function PageCompList() {
 							<option value={Constants.VIEW_COMPONENT_TYPE_PROFILE_PIC}>Profile Picture</option>
 							<option value={Constants.VIEW_COMPONENT_TYPE_LINK_LIST}>Link List</option>
 							<option value={Constants.VIEW_COMPONENT_TYPE_TEXT_BOX}>Text Box</option>
+							<option value={Constants.VIEW_COMPONENT_TYPE_TAGS}>Tags</option>
 						</select>
 					</div>
 					<div className="">

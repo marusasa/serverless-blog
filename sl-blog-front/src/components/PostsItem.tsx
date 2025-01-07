@@ -1,6 +1,7 @@
 import {PostType} from '../types/MyTypes';
 import { Link  } from "react-router-dom";
 import {useRef } from 'react';
+import {convertToAllowedChars} from '../util/LinkUtil';
 
 function PostsItem({article}:{article:PostType}) {
 
@@ -9,13 +10,14 @@ function PostsItem({article}:{article:PostType}) {
 	const pubDateYYYYMMDD = article.publishedAt.substring(0,10);	//result yyyy-mm-dd format.
 	const pubDate = new Date(article.publishedAt);
 	const dateText = pubDate.toLocaleDateString();
-	const link = convertToAllowedChars(article.title) + "_" + article.articleId;
 	const dialogRef = useRef(null);
 	
 	const handleShowSummary = (e: React.FormEvent) => {
 		e.preventDefault();
 		dialogRef.current.showModal();
 	};
+	
+  	const link = convertToAllowedChars(article.title) + "_" + article.articleId;
 	
 	return (
 		<>
@@ -50,12 +52,3 @@ function PostsItem({article}:{article:PostType}) {
 export default PostsItem
 
 
-function convertToAllowedChars(str:string) {
-	str = str.replaceAll(' ','-');
-	const allowedCharacters:string = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-"
-	// Create a regular expression that matches any character NOT in the allowedChars string
-  	const regex = new RegExp(`[^${allowedCharacters}]`, 'g');
-
-  // Replace all non-allowed characters with an empty string
-  return str.replace(regex, '');
-}

@@ -35,6 +35,7 @@ import com.google.cloud.vertexai.generativeai.ResponseStream;
 import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.documentref.ArticleLikeDoc;
+import ssg.serverlessblog.documentref.ArticleTagDoc;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
 import ssg.serverlessblog.interfaces.ArticleDaoInt;
@@ -67,9 +68,112 @@ public class ArticleDao implements ArticleDaoInt {
 		}
 		return articles_likes;
 	}
-		
+	
+	private CollectionReference articles_tags = null;
+	private CollectionReference collectionTags() throws IOException {
+		if(articles_tags == null) {
+			articles_tags = FirestoreDbUtil.getFirestoreDbObj().collection(ArticleTagDoc.collection);
+		}
+		return articles_tags;
+	}
+	
+	@Override
+	public List<CloudDocument> getArticleTags(String articleId) throws Exception {
+		final List<CloudDocument> result = new ArrayList<CloudDocument>();
+		try {
+			final Query query = collectionTags()
+					.whereEqualTo(ArticleTagDoc.field_article_id, articleId);
+			
+			final ApiFuture<QuerySnapshot> future = query.get();
+			final QuerySnapshot qs = future.get();
+				
+			for (QueryDocumentSnapshot document : qs.getDocuments()) {
+				//make the response light
+				final var data = document.getData();
+				result.add(new CloudDocument(document.getId(), data));
+			}
+		}catch(Exception e) {
+			throw e;
+		}
+		return result;
+	}
 	
 	
+	
+	@Override
+	public boolean updateArticleTag(String articleId, List<String> tagIds) throws Exception {
+		var result = false;
+		try {
+			List<CloudDocument> oldTags = getArticleTags(articleId);
+			//convert CloudDocument list to list of String
+			List<String> oldIds  = oldTags.stream().map(doc -> doc.getString(ArticleTagDoc.field_tag_id)).toList();
+			List<String> tagsToDelete = new ArrayList<>();
+			List<String> tagsToAdd = new ArrayList<>();
+			
+			//populate tagsToDelete
+			oldIds.stream().filter(oldId -> !tagIds.contains(oldId))
+					.forEach(oldId -> tagsToDelete.add(oldId));
+			
+			//populate tagsToAdd
+			if(tagIds.size() != oldTags.size()) {
+				tagIds.stream().filter(newId -> !oldIds.contains(newId)).forEach(newId -> tagsToAdd.add(newId));
+			}
+	 				
+			//delete unneeded tags
+			for(String deleteTagId: tagsToDelete) {
+				for(CloudDocument cd: oldTags) {
+					if(cd.getString(ArticleTagDoc.field_tag_id).equals(deleteTagId)) {
+						//delete document.
+						final DocumentReference docRef = collectionTags().document(cd.getId());					
+						final ApiFuture<DocumentSnapshot> future = docRef.get();
+						final DocumentSnapshot document = future.get();
+						if(document.exists()) {
+							final ApiFuture<WriteResult> writeResult = docRef.delete();
+							writeResult.get();
+						}				
+					}
+				}
+			}
+			
+			//add new tags
+			for(String addTagId: tagsToAdd) {
+				final Map<String, Object> data = new HashMap<>();
+				data.put(ArticleTagDoc.field_article_id, articleId);
+				data.put(ArticleTagDoc.field_tag_id, addTagId);
+				data.put(ArticleTagDoc.field_created_at, Timestamp.now());
+				final ApiFuture<DocumentReference> docRef = collectionTags().add(data);
+				docRef.get();
+			}
+			
+			result = true;
+		}catch(Exception e) {
+			logger.error("Error while updating Article Tag",e);			
+		}
+		return result;
+	}
+	
+	
+
+	@Override
+	public List<CloudDocument> getArticlesByTag(String tagId) throws Exception {
+		final List<CloudDocument> result = new ArrayList<CloudDocument>();
+		try {
+			final Query query = collectionTags()
+					.whereEqualTo(ArticleTagDoc.field_tag_id, tagId);
+			
+			final ApiFuture<QuerySnapshot> future = query.get();
+			final QuerySnapshot qs = future.get();
+				
+			for (QueryDocumentSnapshot document : qs.getDocuments()) {
+				final var data = document.getData();
+				result.add(new CloudDocument(document.getId(), data));
+			}
+		}catch(Exception e) {
+			throw e;
+		}
+		return result;
+	}
+
 	@Override
 	public long incrementArticleLike(final String articleId) throws Exception {
 		DocumentReference docRef = collectionLikes().document(articleId);			
@@ -219,11 +323,13 @@ public class ArticleDao implements ArticleDaoInt {
 			updates.put(ArticleDoc.field_summary, article.summary());
 			updates.put(ArticleDoc.field_summary_ai, true);
 			
+			//published at logic
 			if(oldStatus.equals(AppConst.ART_STATUS_DRAFT) && article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
 				Timestamp now = Timestamp.now();
 				updates.put(ArticleDoc.field_published_at, now);
 				updates.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
-			}
+			}			
+			
 			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
 		    writeResult.get();				
 			result = true;

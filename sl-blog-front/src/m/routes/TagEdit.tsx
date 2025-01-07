@@ -2,31 +2,28 @@ import { useState,useEffect } from 'react';
 import { useLocation, useNavigate } from "react-router-dom";
 import Loading from "../components/Loading";
 import {SubmitButton, FormTitle} from "../components/FormComp";
-import Constants from '../../util/Constants';
 
-function PageCompEdit() {
+function TagEdit() {
 	const navigate = useNavigate();
 	const {state} = useLocation();
-	const {pageComponentId} = state; // Read values passed on state
+	const {tagId} = state; // Read values passed on state
 	
-	const [type, setType] = useState('');
+	const [name, setName] = useState('');
 	const [json, setJson] = useState('');
-	const [order, setOrder] = useState(0); // Set initial value
-	const [enabled, setEnabled] = useState(false);
+	const [description, setDescription] = useState(''); // Set initial value
 	const [loaded, setLoaded] = useState(false);
 	const [inSave,setInSave] = useState(false);
 	const [inDelete,setInDelete] = useState(false);
 	
 	useEffect(() => {
-			fetch('/mng/components/' + pageComponentId)
+			fetch('/mng/tags/' + tagId)
 				.then((response) => response.json())
 				.then((data) => {
 					if (data.result == 'success') {
-						setType(data.component.type);
-						const o = JSON.parse(data.component.json);
+						setName(data.tag.name);
+						const o = JSON.parse(data.tag.json);
 						setJson(JSON.stringify(o,null,4));
-						setOrder(data.component.order);
-						setEnabled(data.component.enabled);
+						setDescription(data.tag.description);
 						setLoaded(true);
 					} else {
 						alert(JSON.stringify(data.messages));
@@ -39,37 +36,15 @@ function PageCompEdit() {
 		}, []);
 		
 		
-	const updateComponent = async (data: string, order: number, enabled: boolean) => {
+	const updateTag = async (name: string, json: string, description: string) => {
 		try {
-			let action = "";
-			switch (type) {
-				case Constants.VIEW_COMPONENT_TYPE_PROFILE_PIC: {
-					action = "profile-pic";
-					break;
-				}
-				case Constants.VIEW_COMPONENT_TYPE_LINK_LIST: {
-					action = "link-list";
-					break;
-				}
-				case Constants.VIEW_COMPONENT_TYPE_TEXT_BOX: {
-					action = "text-box";
-					break;
-				}
-				case Constants.VIEW_COMPONENT_TYPE_TAGS: {
-					action = "tags";
-					break;
-				}
-				default: {
-					throw "Unknown component type exception. Data not saved.";
-				}
-			}
-
-			await fetch('/mng/components/' + pageComponentId + '/' + action, {
+			setInSave(true);
+			await fetch('/mng/tags/' + tagId, {
 				method: 'PATCH',
 				body: JSON.stringify({
-					data: JSON.parse(data),
-					order: order,
-					enabled: enabled
+					articleIds: JSON.parse(json),
+					name: name,
+					description: description
 				}),
 				headers: {
 					'Content-type': 'application/json; charset=UTF-8',
@@ -79,7 +54,7 @@ function PageCompEdit() {
 				.then((data) => {
 					if (data.result == 'success') {
 						alert('Data saved.');
-						navigate('/m/components');
+						navigate('/m/tags');
 					} else {
 						alert(JSON.stringify(data.messages));
 					}
@@ -93,11 +68,12 @@ function PageCompEdit() {
 				});
 		} catch (error) {
 			alert(error);
+			setInSave(false);
 		}
 	};
 	
-	const deleteComp = async () => {
-			   await fetch('/mng/components/' + pageComponentId, {
+	const deleteTag = async () => {
+			   await fetch('/mng/components/' + tagId, {
 			      method: 'DELETE',
 			      headers: {
 			         'Content-type': 'application/json; charset=UTF-8',
@@ -106,7 +82,7 @@ function PageCompEdit() {
 			      .then((response) => response.json())
 			      .then((data) => {
 						if(data.result == 'success'){
-							navigate('/m/components');					
+							navigate('/m/tags');					
 						}else{
 							alert(JSON.stringify(data.messages));
 						}
@@ -122,22 +98,21 @@ function PageCompEdit() {
 	
 	const handleSave = (e: React.FormEvent) => {
 	   e.preventDefault();
-	   setInSave(true);
-	   updateComponent(json,order,enabled);
+	   updateTag(name,json,description);
 	};    
 	const handleCancel = () => {
-		navigate('/m/components');
+		navigate('/m/tags');
 	};
 	const handleDelete = (e: React.FormEvent) => {
 		e.preventDefault();
 		if(confirm('Delete record?')){
 			setInDelete(true);
-			deleteComp();
+			deleteTag();
 		}
 	};
 	return (
 		<>
-			<FormTitle text="Edit Component"/>
+			<FormTitle text="Edit Tag"/>
 			<Loading loaded={loaded}/>
 			<div className={loaded ? 'visible' : 'invisible'}>
 				<form>
@@ -148,29 +123,19 @@ function PageCompEdit() {
 					</div>
 					<label className="form-control mb-4">
 						<div className="label">
-							<span className="label-text">Order:</span>
+							<span className="label-text">Name:</span>
 						</div>
-						<input type="number" className="input input-bordered w-full max-w-5xl" value={order}
-								onChange={(e) => setOrder(Number(e.target.value))} />
+						<input type="text" className="input input-bordered w-full max-w-5xl" value={name}
+								onChange={(e) => setName(e.target.value)} />
 					</label>
 					<label className="form-control mb-4">
 						<div className="label">
-							<span className="label-text">Status:</span>
+							<span className="label-text">Description:</span>
 						</div>
-						<select className="select select-bordered w-full max-w-xs" value={enabled === true?'true':'false'}
-							onChange={(e) => setEnabled(e.target.value === 'true'?true:false)} >
-							<option selected value='true'>Enable</option>
-							<option value='false'>Disable</option>
-						</select>
-					</label>
-					<label className="form-control mb-4">
-						<div className="label">
-							<span className="label-text">Data:</span>
-						</div>
-						<textarea className="textarea textarea-bordered w-full max-w-5xl" value={json}
-								onChange={(e) => setJson(e.target.value)}
-								rows={20}></textarea>
-					</label>					
+						<textarea className="textarea textarea-bordered w-full max-w-5xl" value={description}
+									onChange={(e) => setDescription(e.target.value)}
+									rows={5}></textarea>
+					</label>									
 				</form>
 			</div>
 
@@ -178,4 +143,4 @@ function PageCompEdit() {
 	)
 }
 
-export default PageCompEdit
+export default TagEdit;

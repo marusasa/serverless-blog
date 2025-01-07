@@ -1,5 +1,6 @@
 package ssg.serverlessblog.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +15,8 @@ import ssg.serverlessblog.data_json.ResultArticleList;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultImageList;
 import ssg.serverlessblog.documentref.ArticleDoc;
+import ssg.serverlessblog.documentref.ArticleTagDoc;
+import ssg.serverlessblog.documentref.TagDoc;
 import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
@@ -67,7 +70,22 @@ public class ArticleController {
 			final String articleId = ctx.pathParam("articleId");
 			
 			final Optional<CloudDocument> op = Env.articleDao.getArticleForManage( articleId); 
-						
+			
+			final List<CloudDocument> tags = Env.articleDao.getArticleTags(articleId);
+			final List<String> tagIds = new ArrayList<>();
+			final List<String> tagNames = new ArrayList<>();
+			tags.forEach(t -> {
+				try {
+					Optional<CloudDocument> tag = Env.tagDao.getTag(t.getString(ArticleTagDoc.field_tag_id));
+					tag.ifPresent(tg -> {
+						tagIds.add(tg.getId());
+						tagNames.add(tg.getString(TagDoc.field_name));
+					});
+				}catch(Exception e) {
+					//do nothing.
+				}
+			});
+			
 			if(op.isEmpty()) {
 				result.getMessages().add("Article not obtained.");
 				ctx.json(result);
@@ -86,6 +104,8 @@ public class ArticleController {
 					.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
 					.publishedAt(publishedAt)
 					.summary(document.getString(ArticleDoc.field_summary))
+					.tagIds(tagIds)
+					.tagNames(tagNames)
 					.build();
 			result.setArticle(article);
 			result.setResult(AppConst.RESULT_SUCCESS);
@@ -102,7 +122,7 @@ public class ArticleController {
 		try {
 			final Article article = ctx.bodyAsClass(Article.class);
 			
-			if(Env.articleDao.updateArticle(article)) {
+			if(Env.articleDao.updateArticle(article) && Env.articleDao.updateArticleTag(article.articleId(), article.tagIds())) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Article %s not updated.".formatted(article.articleId()));
@@ -160,7 +180,7 @@ public class ArticleController {
 		}
 		ctx.json(result);
 	}
-	
+		
 	public static void addImage(Context ctx) {
 		final ResultBase result = new ResultBase();
 		try {			
