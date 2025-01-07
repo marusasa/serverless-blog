@@ -84,7 +84,7 @@ function AnalyticsPageEngagement() {
 				<select className="select select-bordered select-sm mr-3" value={year}
 					onChange={(e) => setYear(e.target.value)} >
 					<option value={year1}>{year1}</option>
-					<option value={year1}>{year2}</option>
+					<option value={year2}>{year2}</option>
 					<option value={year3}>{year3}</option>
 					<option value={year4}>{year4}</option>
 				</select>
