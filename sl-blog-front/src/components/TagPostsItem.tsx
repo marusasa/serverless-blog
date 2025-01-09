@@ -8,6 +8,8 @@ function TagPostsItem({article}:{article:PostType}) {
 
 	const link = convertToAllowedChars(article.title) + "_" + article.articleId;
 	const dialogRef = useRef(null);
+	const pubDate = new Date(article.publishedAt);
+	const dateText = pubDate.toLocaleDateString();
 	
 	const handleShowSummary = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -20,8 +22,10 @@ function TagPostsItem({article}:{article:PostType}) {
 				<div className="card-body p-0">
 					<div className="flex flex-wrap">
 						<h2 className="card-title"><Link  to={"/post/" + link} className="tag-link mr-5">{article.title}</Link ></h2>
+					</div>
+					<div className="flex flex-wrap">
 						<p className="mt-0.5">
-							<a className={article.summary == "" || article.summary == null? 
+							{dateText} <a className={article.summary == "" || article.summary == null? 
 								'invisible':'visible' + " link link-accent"}
 								onClick={handleShowSummary}
 							>Show AI Summary</a>

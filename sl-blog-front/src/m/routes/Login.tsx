@@ -1,38 +1,45 @@
 import { useState } from 'react';
+import {SubmitButton} from "../components/FormComp";
 
 function Login() {
 
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
+	const [inLogin, setInLogin] = useState(false);
 	
 	const login = async (username: string, password: string) => {
-		   await fetch('/login', {
-		      method: 'POST',
-		      body: JSON.stringify({
-		        	username: username,
-					password: password
-		      }),
-		      headers: {
-		         'Content-type': 'application/json; charset=UTF-8',
-		      },
-		   })
-		      .then((response) => response.json())
-		      .then((data) => {
+		setInLogin(true);
+		await fetch('/login', {
+			method: 'POST',
+			body: JSON.stringify({
+				username: username,
+				password: password
+			}),
+			headers: {
+				'Content-type': 'application/json; charset=UTF-8',
+			},
+		})
+			.then((response) => response.json())
+			.then((data) => {
 				if (data.result == 'success') {
 					window.location.replace('/m');
-				}else{
+				} else {
 					alert("Login failed.");
 				}
-		      })
-		      .catch((err) => {
-		         console.log(err.message);
-		      });
-		};
-		
-		const handleLogin = (e: React.FormEvent) => {
-		   e.preventDefault();
-		   login(username,password);
-		};   
+			})
+			.finally(() => {
+				setInLogin(false);
+			})
+			.catch((err) => {
+				console.log(err.message);
+			});
+			
+	};
+
+	const handleLogin = (e: React.FormEvent) => {
+		e.preventDefault();
+		login(username, password);
+	};
 	
 	return (
 		<>
@@ -51,7 +58,7 @@ function Login() {
 							onChange={(e) => setPassword(e.target.value)} />
 					</div>
 					<div className="text-center">
-						<button type="submit" className="btn btn-primary">Login</button>
+						<SubmitButton text="Login" inProcess={inLogin} callback={handleLogin} classes="btn-sm btn-primary"/>
 					</div>
 				</div>
 			</form>
