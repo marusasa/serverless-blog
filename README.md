@@ -2,23 +2,20 @@
 
 A blog platform designed to run on cloud serverless PaaS Environment.
 
-Currently supporting Google Cloud, but planned to support AWS in the future.
+Currently supporting Google Cloud.
 
 The server is currently running my personal blog at: [https://sasagu.com](https://sasagu.com).
-
-**Notice: The application is in Alpha stage. It is missing some basic features.**
 
 # Highlight
 
 - Run it in a highly scalable, reliable and fast PaaS environment.
-- Running systems on PaaS platform is cost effective. Zero costs when idle.
+- Running systems on PaaS platform is cost effective. Zero costs when idle. Less than $1 running my blog.
 
 # Technology Stack - Backend
 
 - Java 21
 - Javalin Server
-- Google App Engine
-- Google Cloud Datastore (Firestore)
+- Google Cloud App Engine, Cloud Storage, Datastore (Firestore), Gemini API 
 - Maven
 
 # Technology Stack - Frontend
@@ -34,7 +31,7 @@ The server is currently running my personal blog at: [https://sasagu.com](https:
 
 - An account with Google Cloud Platform with billing enabled.
 - A project in Google Cloud
-- To enable AI Summary, 'Gemini API' must be enabled within the Google Cloud project.
+- Enable 'Cloud Storage', 'Datastore' and 'Gemini API' within the Google Cloud project.
 
 # How to deploy
 

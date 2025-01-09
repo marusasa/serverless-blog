@@ -73,7 +73,7 @@ function TagEdit() {
 	};
 	
 	const deleteTag = async () => {
-			   await fetch('/mng/components/' + tagId, {
+			   await fetch('/mng/tags/' + tagId, {
 			      method: 'DELETE',
 			      headers: {
 			         'Content-type': 'application/json; charset=UTF-8',
