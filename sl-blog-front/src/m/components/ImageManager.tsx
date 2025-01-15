@@ -8,6 +8,7 @@ function ImageManager({ isOpen, onClose, articleId }:{isOpen:boolean, onClose:(e
 	const [selectedFiles, setSelectedFiles] = useState([]);
 	const [images, setImages] = useState([]);
 	const [loaded, setLoaded] = useState(false);
+	const [imagesExist, setImagesExist] = useState(false);
 	
 
 	useEffect(() => {
@@ -28,6 +29,9 @@ function ImageManager({ isOpen, onClose, articleId }:{isOpen:boolean, onClose:(e
 			.then((data) => {
 				if (data.result == 'success') {
 					setImages(data.images);
+					if(data.images.length > 0){
+						setImagesExist(true);
+					}
 				} else {
 					alert(JSON.stringify(data.messages));
 				}
@@ -92,12 +96,11 @@ function ImageManager({ isOpen, onClose, articleId }:{isOpen:boolean, onClose:(e
 					<h3 className="font-bold text-lg mb-3">Add Image</h3>
 					<input type="file" name="files" onChange={handleFileChange} multiple ref={fileInputRef} className="mb-5"/>
 					<button className="btn btn-sm" onClick={uploadImage}>Upload</button>
-					<h3 className="font-bold text-lg  mb-3">Image List</h3>
 					<Loading loaded={loaded}/>
 					<div className={loaded?'':'hidden'}>
-						<table>
+						<table className={imagesExist?'':'hidden'}>
 							<thead>
-								<th>Image File</th>
+								<th className="font-bold text-lg  mb-3 text-left">Image Files</th>
 								<th></th>
 							</thead>
 							<tbody>
