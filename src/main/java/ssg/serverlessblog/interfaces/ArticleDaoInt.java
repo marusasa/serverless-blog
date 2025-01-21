@@ -24,6 +24,7 @@ public interface ArticleDaoInt {
 	public long getArticlesForBlogTotalCount() throws Exception;
 	public boolean deleteArticle(String articleId) throws Exception;	
 	public String generateAiSummary(String articleId) throws Exception;
+	public String generateAiGrammarCheck(String prompt, String content) throws Exception;
 	public long incrementArticleLike(String articleId) throws Exception;
 	public boolean isArticleExists(String articleId) throws Exception;
 	public List<CloudDocument> getArticleTags(String articleId) throws Exception;

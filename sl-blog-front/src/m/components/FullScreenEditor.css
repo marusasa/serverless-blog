@@ -1,4 +1,4 @@
-.reactMarkDown a{
+.reactMarkDown a, .helpContent a{
     @apply link;
     @apply link-accent;
 }

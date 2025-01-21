@@ -10,9 +10,10 @@ The server is currently running my personal blog at: [https://sasagu.com](https:
 
 - Run it in a highly scalable, reliable and fast PaaS environment.
 - Running systems on PaaS platform is cost effective. Zero costs when idle. Less than $1 running my blog.
-- Markdown Support
-- Full screen article editor with Markdown preview.
-- AI integration (AI summary)
+- Full mobile responsive support 
+- Markdown support
+- Full screen article editor with Markdown preview and AI support.
+- AI integration (AI article grammar + AI summary)
 - Image Manager
 - Built-in Analytics
 - RSS feed

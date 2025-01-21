@@ -4,6 +4,8 @@ import Loading from "../components/Loading";
 import {SubmitButton, FormTitle} from "../components/FormComp";
 import FullScreenEditor from '../components/FullScreenEditor';
 import Select from 'react-select'
+import FullScreenEditor from '../components/FullScreenEditor';
+import PostEditHelp from '../components/PostEditHelp';
 
 function PostEdit() {
 	const navigate = useNavigate();
@@ -238,6 +240,7 @@ function PostEdit() {
 						<SubmitButton text={status === 'draft'?'Publish':'Unpublish'} inProcess={inPubSave} callback={handlePupUnPub} classes="btn-sm btn-secondary"/>
 						<button className="btn btn-sm mr-3" onClick={handleCancel}>Back</button>	
 						<SubmitButton text="Delete" inProcess={inDelete} callback={handleDelete} classes="btn-sm btn-accent"/>
+						<button className="btn btn-sm  mr-3" onClick={(e: React.FormEvent)=>{e.preventDefault();document.getElementById('dialog_postedit_help').showModal();}}>?</button>
 						<span className="text-red-500 mt-1">{saveMsg}</span>
 					</div>
 					<label className="form-control mb-4">
@@ -271,7 +274,7 @@ function PostEdit() {
 					<label className="form-control mb-4">
 						<div className="label">
 							<span className="label-text">Article: 
-								<button className="ml-3 btn btn-xs" onClick={handleOpenFullScreenEditor}>Full-Screen Editor</button></span>
+								<button className="ml-3 btn btn-xs btn-outline btn-secondary" onClick={handleOpenFullScreenEditor}>Full-Screen Editor with AI</button></span>
 						</div>
 						<textarea className="textarea textarea-bordered w-full max-w-5xl" value={body}
 								onChange={(e) => {setBody(e.target.value);setPostChanged(true);}} rows={20}></textarea>
@@ -281,6 +284,7 @@ function PostEdit() {
 			</div>
 			<FullScreenEditor ref={dialogRef} body={body} setBody={setBody} setPostChanged={setPostChanged} 
 					handleSave={handleSave} inSave={inSave} saveMsg={saveMsg} articleId={articleId}/>
+			<PostEditHelp idName='dialog_postedit_help'/>
 		</>
 	)
 }

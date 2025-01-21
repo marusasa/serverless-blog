@@ -111,6 +111,9 @@ public class BlogMain {
 							post(ArticleController::addImage);
 							get(ArticleController::getImages);
 						});
+						path("ai-grammar",() ->{
+							post(ArticleController::getAiGrammarCheck);
+						});
 					});
 					path("setting", () ->{
 						get(SettingController::get);

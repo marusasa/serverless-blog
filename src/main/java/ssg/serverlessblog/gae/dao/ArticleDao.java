@@ -30,6 +30,7 @@ import com.google.cloud.vertexai.api.HarmCategory;
 import com.google.cloud.vertexai.api.SafetySetting;
 import com.google.cloud.vertexai.generativeai.ContentMaker;
 import com.google.cloud.vertexai.generativeai.GenerativeModel;
+import com.google.cloud.vertexai.generativeai.ResponseHandler;
 import com.google.cloud.vertexai.generativeai.ResponseStream;
 
 import ssg.serverlessblog.data_json.Article;
@@ -502,4 +503,33 @@ public class ArticleDao implements ArticleDaoInt {
 		return result.toString();
 	}
 
+	public String generateAiGrammarCheck(final String prompt, final String content) throws Exception {
+		String output = "";
+		final Optional<CloudDocument> setting = Env.settingDao.getSetting();
+		try (VertexAI vertexAi = new VertexAI(setting.get().getString(SettingDoc.field_gae_ai_project_id), 
+				setting.get().getString(SettingDoc.field_gae_ai_location));) {
+			
+			final var completePrompt = "With the following text, " + prompt + "\n\nText: " + content; 
+
+			final GenerationConfig generationConfig = GenerationConfig.newBuilder().setMaxOutputTokens(1024)
+					.setTemperature(2F).setTopP(0.95F).build();
+			final List<SafetySetting> safetySettings = Arrays.asList(
+					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
+							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
+					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT)
+							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
+					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT)
+							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
+					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_HARASSMENT)
+							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build());
+			final GenerativeModel model = new GenerativeModel.Builder().setModelName("gemini-1.5-flash-002")
+					.setVertexAi(vertexAi).setGenerationConfig(generationConfig).setSafetySettings(safetySettings)
+					.build();
+
+			GenerateContentResponse response = model.generateContent(completePrompt);
+		    output = ResponseHandler.getText(response);
+		}
+		return output;
+	}
+	
 }

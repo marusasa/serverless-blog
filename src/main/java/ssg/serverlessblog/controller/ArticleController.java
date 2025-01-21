@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import ssg.serverlessblog.data_json.Article;
+import ssg.serverlessblog.data_json.ReqAiGrammar;
+import ssg.serverlessblog.data_json.ResultAiGrammar;
 import ssg.serverlessblog.data_json.ResultAiSummary;
 import ssg.serverlessblog.data_json.ResultArticle;
 import ssg.serverlessblog.data_json.ResultArticleList;
@@ -44,6 +46,23 @@ public class ArticleController {
 		}
 		
 		
+		ctx.json(result);
+	}
+	
+	public static void getAiGrammarCheck(Context ctx) {
+		final ResultAiGrammar result = new ResultAiGrammar();
+		try {
+			final ReqAiGrammar req = ctx.bodyAsClass(ReqAiGrammar.class);
+			
+			//generate
+			final String suggestion = Env.articleDao.generateAiGrammarCheck(req.prompt(), req.content());
+			result.setContent(suggestion);
+			
+			result.setResult(AppConst.RESULT_SUCCESS);
+		}catch(Exception e) {
+			logger.error("Error generating ai grammar check.",e);
+			result.getMessages().add("Error generating ai grammar check.");
+		}
 		ctx.json(result);
 	}
 	
