@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.PageComponentLogic;
 import ssg.serverlessblog.data_json.PageComponent;
 import ssg.serverlessblog.data_json.ResultPageComponentList;
 import ssg.serverlessblog.documentref.PageComponentDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
 
@@ -29,7 +29,7 @@ public class PageComponentHandler implements Handler {
 		try {
 			//Currently multi-tenant is not part of the design.
 			//However, account id is used for possible future implementation.
-			final List<CloudDocument> list = Env.pageComponentDao.getPageComponents();
+			final List<CloudDocument> list = PageComponentLogic.getPageComponents();
 			
 			list.forEach(document -> {
 				if(document.getBoolean(PageComponentDoc.field_enabled)) {

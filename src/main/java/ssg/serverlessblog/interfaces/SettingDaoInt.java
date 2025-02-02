@@ -1,8 +1,8 @@
 package ssg.serverlessblog.interfaces;
 
+import java.util.Map;
 import java.util.Optional;
 
-import ssg.serverlessblog.data_json.Setting;
 import ssg.serverlessblog.util.CloudDocument;
 
 /**
@@ -14,5 +14,6 @@ import ssg.serverlessblog.util.CloudDocument;
 public interface SettingDaoInt {
 
 	public Optional<CloudDocument> getSetting() throws Exception;	
-	public void updateSetting( Setting setting) throws Exception;
+	public void updateSetting(String settingId, Map<String, Object> data) throws Exception;
+	public void createSetting(Map<String, Object> data) throws Exception;
 }

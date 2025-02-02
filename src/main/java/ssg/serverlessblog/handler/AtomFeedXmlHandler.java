@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.ArticleLogic;
+import ssg.serverlessblog.daobase.SettingLogic;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.system.Env;
@@ -28,7 +30,7 @@ public class AtomFeedXmlHandler implements Handler {
 		logger.info("/feed Atom RSS invoked.");
 		ctx.res().setContentType("application/xml;charset=UTF-8");
 		
-		final List<CloudDocument> documents = Env.articleDao.getArticlesForBlogAll();						
+		final List<CloudDocument> documents = ArticleLogic.getArticlesForBlogAll();						
 		
 		//Header area
 		var result = new StringBuilder();
@@ -119,7 +121,7 @@ public class AtomFeedXmlHandler implements Handler {
 		if(AppProperties.getBoolean("basic.use-hardcoded-val")) {
 			result = AppProperties.getString("basic.title");
 		}else {
-			final Optional<CloudDocument> setting = Env.settingDao.getSetting();			
+			final Optional<CloudDocument> setting = SettingLogic.getSetting();			
 			if(setting.isPresent()) {
 				result = setting.get().getString(SettingDoc.field_blog_title);
 			}

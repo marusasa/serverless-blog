@@ -3,15 +3,14 @@ package ssg.serverlessblog.controller;
 import java.util.Optional;
 
 import org.slf4j.Logger;
-
 import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
+import ssg.serverlessblog.daobase.SettingLogic;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultSetting;
 import ssg.serverlessblog.data_json.Setting;
 import ssg.serverlessblog.documentref.SettingDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
 
@@ -25,7 +24,7 @@ public class SettingController {
 	public static void get(Context ctx) {
 		final ResultSetting result = new ResultSetting();
 		try {
-			final Optional<CloudDocument> op = Env.settingDao.getSetting();
+			final Optional<CloudDocument> op = SettingLogic.getSetting();
 			if(op.isPresent()) {
 				final CloudDocument doc = op.get();
 				final var s = new Setting.Builder()
@@ -50,7 +49,7 @@ public class SettingController {
 		try {
 			final Setting setting = ctx.bodyAsClass(Setting.class);				
 			
-			Env.settingDao.updateSetting( setting);
+			SettingLogic.updateSetting( setting);
 			result.setResult(AppConst.RESULT_SUCCESS);
 			logger.info("Setting updated - id:%s".formatted(setting.settingId()));			
 		}catch(Exception e) {

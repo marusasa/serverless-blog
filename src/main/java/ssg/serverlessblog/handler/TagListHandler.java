@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.TagLogic;
 import ssg.serverlessblog.data_json.ResultTagList;
 import ssg.serverlessblog.data_json.Tag;
 import ssg.serverlessblog.documentref.TagDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
 
@@ -28,7 +28,7 @@ public class TagListHandler implements Handler {
 		final ResultTagList result = new ResultTagList();
 		try {
 			
-			List<CloudDocument> tags = Env.tagDao.getTags();			
+			List<CloudDocument> tags = TagLogic.getTags();			
 			
 			for (CloudDocument doc : tags) {			
 				final var tag = new Tag.Builder()

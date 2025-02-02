@@ -1,6 +1,5 @@
 package ssg.serverlessblog.handler;
 
-import java.util.Calendar;
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
@@ -9,9 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.SettingLogic;
 import ssg.serverlessblog.data_json.ResultBasicInfo;
 import ssg.serverlessblog.documentref.SettingDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AnalyticsUtil;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.AppProperties;
@@ -39,7 +38,7 @@ public class BasicInfoHandler implements Handler {
 				result.setFaviconUrl(AppProperties.getString("basic.favicon-url"));
 				result.setResult(AppConst.RESULT_SUCCESS);				
 			}else {
-				final Optional<CloudDocument> setting = Env.settingDao.getSetting();
+				final Optional<CloudDocument> setting = SettingLogic.getSetting();
 							
 				if(setting.isPresent()) {
 					final var document = setting.get();

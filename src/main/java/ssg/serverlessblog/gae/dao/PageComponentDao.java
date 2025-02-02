@@ -2,7 +2,6 @@ package ssg.serverlessblog.gae.dao;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -20,7 +18,6 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
 
-import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.documentref.PageComponentDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
 import ssg.serverlessblog.interfaces.PageComponentDaoInt;
@@ -57,7 +54,6 @@ public class PageComponentDao implements PageComponentDaoInt {
 				return result;
 			}
 			
-			
 			final ApiFuture<WriteResult> writeResult = docRef.delete();
 			writeResult.get();
 			result = true;
@@ -80,7 +76,8 @@ public class PageComponentDao implements PageComponentDaoInt {
 				logger.warn("PageComponent document not found: %s".formatted(pageComponentId));
 				return result;
 			}
-						
+//			final Timestamp ts = (Timestamp)document.get(PageComponentDoc.field_created_at);
+//			System.out.println(ts.toString());						
 			result = Optional.of(new CloudDocument(document.getId(), document.getData()));
 			
 		}catch(Exception e) {
@@ -112,8 +109,7 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 
 	@Override
-	public boolean updatePageComponent(String pageComponentId, String json,
-			long order, boolean enabled) throws Exception {
+	public boolean updatePageComponent(String pageComponentId, Map<String, Object> updates) throws Exception {
 		var result = false;
 		try {
 			final DocumentReference docRef = collection().document(pageComponentId);
@@ -126,11 +122,6 @@ public class PageComponentDao implements PageComponentDaoInt {
 			}
 			 
 			//update document
-			final Map<String, Object> updates = new HashMap<>();
-			updates.put(PageComponentDoc.field_json, json);
-			updates.put(PageComponentDoc.field_view_order, order);
-			updates.put(PageComponentDoc.field_enabled, enabled);
-			updates.put(PageComponentDoc.field_updated_at, Timestamp.now());
 			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
 		    writeResult.get();				
 			result = true;
@@ -142,19 +133,9 @@ public class PageComponentDao implements PageComponentDaoInt {
 	}
 
 	@Override
-	public String createPageComponent(String type, String json, long order, boolean enabled) throws Exception {
+	public String createPageComponent(Map<String, Object> data) throws Exception {
 		var newId = "";
 		try {
-			
-			//add article to database
-			final Map<String, Object> data = new HashMap<>();
-			data.put(PageComponentDoc.field_comp_type, type);
-			data.put(PageComponentDoc.field_json, json);
-			data.put(PageComponentDoc.field_view_order, order);
-			data.put(PageComponentDoc.field_enabled, enabled);
-			data.put(PageComponentDoc.field_created_at, Timestamp.now());
-			data.put(PageComponentDoc.field_updated_at, null);
-			
 			final ApiFuture<DocumentReference> docRef = collection().add(data);
 			newId = docRef.get().getId();
 		}catch(Exception e) {

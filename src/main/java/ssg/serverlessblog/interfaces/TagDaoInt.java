@@ -1,6 +1,7 @@
 package ssg.serverlessblog.interfaces;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ssg.serverlessblog.util.CloudDocument;
@@ -12,9 +13,9 @@ import ssg.serverlessblog.util.CloudDocument;
  * (At the moment there is only one implementation.
  */
 public interface TagDaoInt {
-	public String createTag(String name, String json) throws Exception;
-	public boolean updateTag(String tagId, String name, String json, String description) throws Exception;
+	public String createTag(Map<String, Object> data) throws Exception;
+	public void updateTag(String tagId, Map<String, Object> data) throws Exception;
 	public List<CloudDocument> getTags() throws Exception;
 	public Optional<CloudDocument> getTag(String tagId) throws Exception;
-	public boolean deleteTag(String tagId) throws Exception;
+	public void deleteTag(String tagId) throws Exception;
 }

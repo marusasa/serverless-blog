@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.ArticleLogic;
 import ssg.serverlessblog.data_json.ResultArticleLike;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AnalyticsUtil;
 import ssg.serverlessblog.util.AppConst;
 
@@ -30,8 +30,8 @@ public class ArticleLikeUpdate implements Handler {
 			String key = articleId + "_" + visitorId;
 			
 			if(!visitorSet.contains(key)) {
-				if(Env.articleDao.isArticleExists(articleId)) {
-					result.setCount(Env.articleDao.incrementArticleLike(articleId));
+				if(ArticleLogic.isArticleExists(articleId)) {
+					result.setCount(ArticleLogic.incrementArticleLike(articleId));
 					result.setResult(AppConst.RESULT_SUCCESS);
 				}else {
 					result.getMessages().add("Article not found.");

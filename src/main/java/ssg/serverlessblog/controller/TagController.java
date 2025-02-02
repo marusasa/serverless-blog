@@ -9,13 +9,13 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.javalin.http.Context;
+import ssg.serverlessblog.daobase.TagLogic;
 import ssg.serverlessblog.data_json.ReqTag;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.data_json.ResultTag;
 import ssg.serverlessblog.data_json.ResultTagList;
 import ssg.serverlessblog.data_json.Tag;
 import ssg.serverlessblog.documentref.TagDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
 
@@ -33,7 +33,7 @@ public class TagController {
 		try {
 			final String tagId = ctx.pathParam("tagId");
 			
-			if(Env.tagDao.deleteTag(tagId)) {
+			if(TagLogic.deleteTag(tagId)) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Tag %s not deleted.".formatted(tagId));
@@ -50,7 +50,7 @@ public class TagController {
 		final ResultTag result = new ResultTag();
 		try {
 			final String tagId = ctx.pathParam("tagId");
-			final Optional<CloudDocument> data = Env.tagDao.getTag(tagId);
+			final Optional<CloudDocument> data = TagLogic.getTag(tagId);
 			
 			if(data.isPresent()) {
 				final CloudDocument document = data.get();
@@ -75,7 +75,7 @@ public class TagController {
 	public static void getList(Context ctx) {
 		final ResultTagList result = new ResultTagList();
 		try {
-			final List<CloudDocument> list = Env.tagDao.getTags();
+			final List<CloudDocument> list = TagLogic.getTags();
 			
 			list.forEach(document -> {
 				final var tag = new Tag.Builder()
@@ -102,7 +102,7 @@ public class TagController {
 		
 		
 		try {
-			if(Env.tagDao.updateTag(tagId,req.name(),mapper.writeValueAsString(req.articleIds()),req.description())){
+			if(TagLogic.updateTag(tagId,req.name(),mapper.writeValueAsString(req.articleIds()),req.description())){
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Data not updated.");
@@ -119,7 +119,7 @@ public class TagController {
 		final ResultBase result = new ResultBase();
 		
 		try {
-			Env.tagDao.createTag("New Tag","[]");
+			TagLogic.createTag("New Tag","[]");
 			result.setResult(AppConst.RESULT_SUCCESS);
 			logger.info("Data created.");
 			

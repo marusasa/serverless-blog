@@ -4,6 +4,8 @@ A blog platform designed to run on cloud serverless PaaS Environment.
 
 Currently supporting Google Cloud.
 
+(Local testing is available using a Docker container with MongoDB.)
+
 The server is currently running my personal blog at: [https://sasagu.com](https://sasagu.com).
 
 # Highlight
@@ -34,13 +36,34 @@ The server is currently running my personal blog at: [https://sasagu.com](https:
 - Vite Build
 - NPM
 
-# Requirements to run
+# Test it locally with Docker container
+
+For testing purpose, you can run this system locally with docker container.
+
+It uses MongoDB data store. AI and Analytics are disabled.
+
+Run it with following commands:
+
+```
+	docker network create sb-network
+	
+	docker run -d --network sb-network --name sb-mongo -p 27018:27017 mongo:latest
+	
+	docker run -d -p 8080:8080 --network sb-network --name sb-serverless-blog sasagu/serverless-blog
+
+```
+
+Access the app from `http://localhost:8080`
+
+# Running it on Google Cloud environment
+
+**Requirements:**
 
 - An account with Google Cloud Platform with billing enabled.
 - A project in Google Cloud
 - Enable 'Cloud Storage', 'Datastore' and 'Gemini API' within the Google Cloud project.
 
-# How to deploy
+**How to deploy**
 
 - Install gcloud CLI and initialize your environment:
 
@@ -55,7 +78,7 @@ The server is currently running my personal blog at: [https://sasagu.com](https:
 ```
 
 - By default, the '(default)' datastore is in non-native 'Datastore' mode. Convert it to Firestore native. 
-Optionally, you can delete the existing one and create a new database in navive firestore mode, setting your
+Optionally, you can delete the existing one and create a new database in native firestore mode, setting your
 desired db location. 
 Name it '(default)'.
 
@@ -117,5 +140,6 @@ gcloud storage buckets add-iam-policy-binding gs://BUCKET_NAME --member=allUsers
 By default, it creates an F1 class instance with max 1 instance running.
 
 - Data will be stored in Google Cloud Datastore. 
+
 
 

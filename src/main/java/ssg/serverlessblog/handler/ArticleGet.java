@@ -10,13 +10,15 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.ArticleLogic;
+import ssg.serverlessblog.daobase.DataUtilLogic;
+import ssg.serverlessblog.daobase.TagLogic;
 import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.data_json.ResultArticle;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.documentref.ArticleLikeDoc;
 import ssg.serverlessblog.documentref.ArticleTagDoc;
 import ssg.serverlessblog.documentref.TagDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
 
@@ -37,12 +39,12 @@ public class ArticleGet implements Handler {
 			final int index = articleId.indexOf("_");	//the id could be in article-title-that-can-have-many-words_IdOfTheArticle
 			articleId = articleId.substring(index+1);		
 			
-			final List<CloudDocument> tags = Env.articleDao.getArticleTags(articleId);
+			final List<CloudDocument> tags = ArticleLogic.getArticleTags(articleId);
 			final List<String> tagIds = new ArrayList<>();
 			final List<String> tagNames = new ArrayList<>();
 			tags.forEach(t -> {
 				try {
-					Optional<CloudDocument> tag = Env.tagDao.getTag(t.getString(ArticleTagDoc.field_tag_id));
+					Optional<CloudDocument> tag = TagLogic.getTag(t.getString(ArticleTagDoc.field_tag_id));
 					tag.ifPresent(tg -> {
 						tagIds.add(tg.getId());
 						tagNames.add(tg.getString(TagDoc.field_name));
@@ -52,7 +54,7 @@ public class ArticleGet implements Handler {
 				}
 			});
 			
-			final Optional<CloudDocument>op = Env.articleDao.getArticle(articleId);
+			final Optional<CloudDocument>op = ArticleLogic.getArticle(articleId);
 			if(op.isPresent() && op.get().getString(ArticleDoc.field_status).equals(AppConst.ART_STATUS_PUBLISH)) {
 				final CloudDocument document = op.get();
 				final var article = new Article.Builder()
@@ -60,8 +62,8 @@ public class ArticleGet implements Handler {
 						.body(document.getString(ArticleDoc.field_body))
 						.status(document.getString(ArticleDoc.field_status))
 						.articleId(document.getId())
-						.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
-						.publishedAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
+						.createdAt(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
+						.publishedAt(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
 						.likes(document.getLong(ArticleLikeDoc.field_like_count))//likes
 						.tagIds(tagIds)
 						.tagNames(tagNames)

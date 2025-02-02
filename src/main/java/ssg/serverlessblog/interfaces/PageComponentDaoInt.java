@@ -1,6 +1,7 @@
 package ssg.serverlessblog.interfaces;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import ssg.serverlessblog.util.CloudDocument;
@@ -12,8 +13,8 @@ import ssg.serverlessblog.util.CloudDocument;
  * (At the moment there is only one implementation.
  */
 public interface PageComponentDaoInt {
-	public String createPageComponent(String type, String json, long order, boolean enabled) throws Exception;
-	public boolean updatePageComponent(String pageComponentId, String json, long order, boolean enabled) throws Exception;
+	public String createPageComponent(Map<String, Object> data) throws Exception;
+	public boolean updatePageComponent(String pageComponentId,Map<String, Object> data) throws Exception;
 	public List<CloudDocument> getPageComponents() throws Exception;
 	public Optional<CloudDocument> getPageComponent(String pageComponentId) throws Exception;
 	public boolean deletePageComponent(String pageComponentId) throws Exception;	

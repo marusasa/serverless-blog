@@ -2,6 +2,10 @@ package ssg.serverlessblog.util;
 
 import java.util.Map;
 
+import org.bson.Document;
+
+import com.google.cloud.firestore.DocumentSnapshot;
+
 /**
  * A class representing a document-oriented NoSQL database document.
  * The map object will hold field-value pair from a document.
@@ -12,7 +16,7 @@ import java.util.Map;
  * package.
  */
 public class CloudDocument {
-
+	private Object document;
 	private Map<String,Object> data;
 	private String id = "";
 	
@@ -24,12 +28,34 @@ public class CloudDocument {
 		this.id = id;
 	}
 	
+	public CloudDocument(String id, Document doc) {
+		this.document = doc;
+		this.id = id;
+	}
+	
+	public CloudDocument(String id, DocumentSnapshot doc) {
+		this.document = doc;
+		this.id = id;
+	}
+	
 	public Object get(String key) {
-		return data.get(key);
+		if(document instanceof Document doc) {
+			return doc.get(key);
+		}else if(document instanceof DocumentSnapshot doc) {
+			return doc.get(key);
+		}else {
+			return data.get(key);
+		}
 	}
 	
 	public String getString(String key) {
-		return (String)data.get(key);
+		if(document instanceof Document doc) {
+			return doc.getString(key);
+		}else if(document instanceof DocumentSnapshot doc) {
+			return doc.getString(key);
+		}else {
+			return (String)data.get(key);
+		}
 	}
 	
 	public String getId() {
@@ -37,15 +63,35 @@ public class CloudDocument {
 	}
 	
 	public Long getLong(String key) {
-		return (Long)data.get(key);
+		if(document instanceof Document doc) {
+			return doc.getLong(key);
+		}else if(document instanceof DocumentSnapshot doc) {
+			return doc.getLong(key);
+		}else {
+			return (Long)data.get(key);
+		}
 	}
 	
 	public Boolean getBoolean(String key) {
-		return (Boolean)data.get(key);
+		if(document instanceof Document doc) {
+			return doc.getBoolean(key);
+		}else if(document instanceof DocumentSnapshot doc) {
+			return doc.getBoolean(key);
+		}else {
+			return (Boolean)data.get(key);
+		}
 	}
 	
 	public boolean isNull(String key) {
-		if(data.get(key) == null) {
+		Object obj = null;
+		if(document instanceof Document doc) {
+			obj = doc.get(key);
+		}else if(document instanceof DocumentSnapshot doc) {
+			obj = doc.get(key);
+		}else {
+			obj = data.get(key);
+		}
+		if(obj == null) {
 			return true;
 		}else {
 			return false;

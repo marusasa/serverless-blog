@@ -8,10 +8,11 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.ArticleLogic;
+import ssg.serverlessblog.daobase.DataUtilLogic;
 import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.data_json.ResultArticleList;
 import ssg.serverlessblog.documentref.ArticleDoc;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.AppProperties;
 import ssg.serverlessblog.util.CloudDocument;
@@ -37,13 +38,13 @@ public class ArticleGetList implements Handler {
 			int countPerPage = AppProperties.getInt("articles.count-per-page");
 			if(startAfterMillisec == 0) {
 				//get total page. Only for the first load.
-				final int countTotal = (int)Env.articleDao.getArticlesForBlogTotalCount();				
+				final int countTotal = (int)ArticleLogic.getArticlesForBlogTotalCount();				
 				int pageTotal = (int) Math.ceil((double) countTotal / countPerPage);
 				result.setPageTotal(pageTotal);				
 			}
 			
 			if(result.getMessages().size() == 0) {
-				final List<CloudDocument> documents = Env.articleDao.getArticlesForBlog(startAfterMillisec,countPerPage);						
+				final List<CloudDocument> documents = ArticleLogic.getArticlesForBlog(startAfterMillisec,countPerPage);						
 				
 				if(documents.size() > countPerPage) {
 					//dao tries to retrieve count per page +1.
@@ -66,8 +67,8 @@ public class ArticleGetList implements Handler {
 								.body(body)
 								.status(document.getString(ArticleDoc.field_status))
 								.articleId(document.getId())
-								.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
-								.publishedAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
+								.createdAt(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
+								.publishedAt(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at))
 								.summary(document.getString(ArticleDoc.field_summary))
 								.build();
 						result.getArticles().add(article);

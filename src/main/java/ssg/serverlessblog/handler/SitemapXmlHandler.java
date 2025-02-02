@@ -1,8 +1,6 @@
 package ssg.serverlessblog.handler;
 
-import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -10,13 +8,9 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-import ssg.serverlessblog.data_json.Article;
-import ssg.serverlessblog.data_json.ResultBasicInfo;
+import ssg.serverlessblog.daobase.ArticleLogic;
+import ssg.serverlessblog.daobase.DataUtilLogic;
 import ssg.serverlessblog.documentref.ArticleDoc;
-import ssg.serverlessblog.documentref.SettingDoc;
-import ssg.serverlessblog.system.Env;
-import ssg.serverlessblog.util.AppConst;
-import ssg.serverlessblog.util.AppProperties;
 import ssg.serverlessblog.util.CloudDocument;
 
 /**
@@ -32,7 +26,7 @@ public class SitemapXmlHandler implements Handler {
 		logger.info("sitemap.xml invoked.");
 		ctx.res().setContentType("application/xml;charset=UTF-8");
 		
-		final List<CloudDocument> documents = Env.articleDao.getArticlesForBlogAll();						
+		final List<CloudDocument> documents = ArticleLogic.getArticlesForBlogAll();						
 		
 		var result = new StringBuilder();
 		result.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
@@ -49,9 +43,9 @@ public class SitemapXmlHandler implements Handler {
 			result.append("\n");
 			result.append("<lastmod>");
 			if(document.isNull(ArticleDoc.field_updated_at)) {
-				result.append(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at).substring(0, 10));
+				result.append(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at).substring(0, 10));
 			}else {
-				result.append(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_updated_at).substring(0, 10));
+				result.append(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_updated_at).substring(0, 10));
 			}
 			result.append("</lastmod>");			
 			result.append("\n");

@@ -1,6 +1,9 @@
 package ssg.serverlessblog.interfaces;
 
+import java.util.Map;
 import java.util.Optional;
+
+import ssg.serverlessblog.util.CloudDocument;
 
 /**
  * DAO interface for Users.
@@ -9,5 +12,7 @@ import java.util.Optional;
  * (At the moment there is only one implementation.
  */
 public interface UserDaoInt {
-	public boolean login(String username, String password) throws Exception;
+//	public boolean login(String username, String password) throws Exception;
+	public Optional<CloudDocument> getUser(String username) throws Exception;
+	public void createUser(String userName,Map<String, Object> data) throws Exception;
 }

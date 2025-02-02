@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
-import ssg.serverlessblog.system.Env;
+import ssg.serverlessblog.daobase.AnalyticsLogic;
 
 /**
  * REST service for login.
@@ -35,10 +35,10 @@ public class ScheduledAnalyticsDailyProcess implements Handler {
 				
 				//1st check if result already contains data for this date.
 				//if it does, then something is wrong...
-				if(Env.analyticsDao.dateExistsDailyVisits(todayNum)) {
+				if(AnalyticsLogic.dateExistsDailyVisits(todayNum)) {
 					logger.error("Date %s already exists in Daily Visits result datastore. This shouldn't happen.".formatted(todayNum));
 				}else {
-					Env.analyticsDao.processDailyRawData(today);
+					AnalyticsLogic.processDailyRawData(today);
 				}
 			}else {
 				logger.warn("X-Appengine-Cron header missing!");

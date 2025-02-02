@@ -24,4 +24,10 @@ public class AppConst {
 	 */
 	public static final String RESULT_SUCCESS = "success";
 	public static final String RESULT_FAIL = "fail";
+	
+	/**
+	 * DB Environment	 * 
+	 */
+	public static final String DB_FIRESTORE = "firestore";
+	public static final String DB_MONGO = "mongodb";
 }

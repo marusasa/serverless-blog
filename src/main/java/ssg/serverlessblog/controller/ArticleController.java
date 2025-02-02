@@ -8,6 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
+import ssg.serverlessblog.daobase.AiLogic;
+import ssg.serverlessblog.daobase.ArticleLogic;
+import ssg.serverlessblog.daobase.DataUtilLogic;
+import ssg.serverlessblog.daobase.TagLogic;
 import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.data_json.ReqAiGrammar;
 import ssg.serverlessblog.data_json.ResultAiGrammar;
@@ -32,36 +36,46 @@ public class ArticleController {
 	
 	public static void getAiSummary(Context ctx) {
 		final ResultAiSummary result = new ResultAiSummary();
-		try {
-			final String articleId = ctx.pathParam("articleId");
-			
-			//generate
-			final String summary = Env.articleDao.generateAiSummary(articleId);
-			result.setSummary(summary);
-			
-			result.setResult(AppConst.RESULT_SUCCESS);
-		}catch(Exception e) {
-			logger.error("Error generating ai summary.",e);
-			result.getMessages().add("Error generating ai summary.");
-		}
 		
+		if(!Env.isAiSupported()) {
+			result.getMessages().add("AI functionality not available for this environment.");
+			
+		}else {		
+			try {
+				final String articleId = ctx.pathParam("articleId");
+				
+				//generate
+				final String summary = AiLogic.generateAiSummary(articleId);
+				result.setSummary(summary);
+				
+				result.setResult(AppConst.RESULT_SUCCESS);
+			}catch(Exception e) {
+				logger.error("Error generating ai summary.",e);
+				result.getMessages().add("Error generating ai summary.");
+			}
+		}		
 		
 		ctx.json(result);
 	}
 	
 	public static void getAiGrammarCheck(Context ctx) {
 		final ResultAiGrammar result = new ResultAiGrammar();
-		try {
-			final ReqAiGrammar req = ctx.bodyAsClass(ReqAiGrammar.class);
-			
-			//generate
-			final String suggestion = Env.articleDao.generateAiGrammarCheck(req.prompt(), req.content());
-			result.setContent(suggestion);
-			
-			result.setResult(AppConst.RESULT_SUCCESS);
-		}catch(Exception e) {
-			logger.error("Error generating ai grammar check.",e);
-			result.getMessages().add("Error generating ai grammar check.");
+		
+		if(!Env.isAiSupported()) {
+			result.getMessages().add("AI functionality not available for this environment.");			
+		}else {		
+			try {
+				final ReqAiGrammar req = ctx.bodyAsClass(ReqAiGrammar.class);
+				
+				//generate
+				final String suggestion = AiLogic.generateAiGrammarCheck(req.prompt(), req.content());
+				result.setContent(suggestion);
+				
+				result.setResult(AppConst.RESULT_SUCCESS);
+			}catch(Exception e) {
+				logger.error("Error generating ai grammar check.",e);
+				result.getMessages().add("Error generating ai grammar check.");
+			}
 		}
 		ctx.json(result);
 	}
@@ -71,7 +85,7 @@ public class ArticleController {
 		try {
 			final Article article = ctx.bodyAsClass(Article.class);
 			
-			final String newId = Env.articleDao.createArticle(article);
+			final String newId = ArticleLogic.createArticle(article);
 			
 			logger.info("Data inserted with id: %s".formatted(newId));
 			
@@ -88,14 +102,14 @@ public class ArticleController {
 		try {
 			final String articleId = ctx.pathParam("articleId");
 			
-			final Optional<CloudDocument> op = Env.articleDao.getArticleForManage( articleId); 
+			final Optional<CloudDocument> op = ArticleLogic.getArticleForManage( articleId); 
 			
-			final List<CloudDocument> tags = Env.articleDao.getArticleTags(articleId);
+			final List<CloudDocument> tags = ArticleLogic.getArticleTags(articleId);
 			final List<String> tagIds = new ArrayList<>();
 			final List<String> tagNames = new ArrayList<>();
 			tags.forEach(t -> {
 				try {
-					Optional<CloudDocument> tag = Env.tagDao.getTag(t.getString(ArticleTagDoc.field_tag_id));
+					Optional<CloudDocument> tag = TagLogic.getTag(t.getString(ArticleTagDoc.field_tag_id));
 					tag.ifPresent(tg -> {
 						tagIds.add(tg.getId());
 						tagNames.add(tg.getString(TagDoc.field_name));
@@ -114,13 +128,13 @@ public class ArticleController {
 			final CloudDocument document = op.get();
 			var publishedAt = "";
 			if(document.getString(ArticleDoc.field_status).equals(AppConst.ART_STATUS_PUBLISH)) {
-				publishedAt = Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at);
+				publishedAt = DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at);
 			}
 			final var article = new Article.Builder().title(document.getString(ArticleDoc.field_title))
 					.body(document.getString(ArticleDoc.field_body))
 					.status(document.getString(ArticleDoc.field_status))
 					.articleId(document.getId())
-					.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
+					.createdAt(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
 					.publishedAt(publishedAt)
 					.summary(document.getString(ArticleDoc.field_summary))
 					.tagIds(tagIds)
@@ -141,7 +155,7 @@ public class ArticleController {
 		try {
 			final Article article = ctx.bodyAsClass(Article.class);
 			
-			if(Env.articleDao.updateArticle(article) && Env.articleDao.updateArticleTag(article.articleId(), article.tagIds())) {
+			if(ArticleLogic.updateArticle(article) && ArticleLogic.updateArticleTag(article.articleId(), article.tagIds())) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Article %s not updated.".formatted(article.articleId()));
@@ -159,7 +173,7 @@ public class ArticleController {
 		try {
 			final String articleId = ctx.pathParam("articleId");
 			
-			if(Env.articleDao.deleteArticle( articleId)) {
+			if(ArticleLogic.deleteArticle( articleId)) {
 				result.setResult(AppConst.RESULT_SUCCESS);
 			}else {
 				result.getMessages().add("Article %s not deleted.".formatted(articleId));
@@ -175,19 +189,18 @@ public class ArticleController {
 	public static void listArticleForManage(Context ctx) {
 		final ResultArticleList result = new ResultArticleList();
 		try {
-			final List<CloudDocument> list = Env.articleDao.getArticlesForManage();			
+			final List<CloudDocument> list = ArticleLogic.getArticlesForManage();			
 			
 			for (CloudDocument document : list) {				
 				var publishedAt = "";
 				if(document.getString(ArticleDoc.field_status).equals(AppConst.ART_STATUS_PUBLISH)) {
-					publishedAt = Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at);
+					publishedAt = DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_published_at);
 				}
 				
 				final var article = new Article.Builder().title(document.getString(ArticleDoc.field_title))
-						.body(document.getString(ArticleDoc.field_body))
 						.status(document.getString(ArticleDoc.field_status))
 						.articleId(document.getId())
-						.createdAt(Env.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
+						.createdAt(DataUtilLogic.getJavaScriptUtcDateTime(document, ArticleDoc.field_created_at))
 						.publishedAt(publishedAt)
 						.build();								
 				result.getArticles().add(article);
@@ -202,35 +215,43 @@ public class ArticleController {
 		
 	public static void addImage(Context ctx) {
 		final ResultBase result = new ResultBase();
-		try {			
-			final var files = ctx.uploadedFiles();
-			final String articleId = ctx.pathParam("articleId");
-			files.forEach(uploadedFile -> {
-				try {
-					Env.storageDao.addFile("ARTICLES/" + articleId, uploadedFile.filename(), uploadedFile.content());
-				}catch(Exception e) {
-					e.printStackTrace();
-				}
-			 	
-			});
-			result.setResult(AppConst.RESULT_SUCCESS);
-		}catch(Exception e) {
-			logger.error("Error getting articles.",e);
-			result.getMessages().add("Error getting articles.");
+		if(!Env.isImageManagerSupported()) {
+			result.getMessages().add("Image Manager functionality not supported.");			
+		}else {	
+			try {			
+				final var files = ctx.uploadedFiles();
+				final String articleId = ctx.pathParam("articleId");
+				files.forEach(uploadedFile -> {
+					try {
+						Env.storageDao.addFile("ARTICLES/" + articleId, uploadedFile.filename(), uploadedFile.content());
+					}catch(Exception e) {
+						e.printStackTrace();
+					}
+				 	
+				});
+				result.setResult(AppConst.RESULT_SUCCESS);
+			}catch(Exception e) {
+				logger.error("Error getting articles.",e);
+				result.getMessages().add("Error getting articles.");
+			}
 		}
 		ctx.json(result);
 	}
 	
 	public static void getImages(Context ctx) {
 		final var result = new ResultImageList();
-		final String articleId = ctx.pathParam("articleId");
-		try {
-			result.images = Env.storageDao.getImages(articleId);
-			result.setResult(AppConst.RESULT_SUCCESS);
-		}catch(Exception e) {
-			logger.error("Error getting images.",e);
-			result.getMessages().add("Error getting images.");
-		}		
+		if(!Env.isImageManagerSupported()) {
+			result.getMessages().add("Image Manager functionality not supported.");			
+		}else {	
+			final String articleId = ctx.pathParam("articleId");
+			try {
+				result.images = Env.storageDao.getImages(articleId);
+				result.setResult(AppConst.RESULT_SUCCESS);
+			}catch(Exception e) {
+				logger.error("Error getting images.",e);
+				result.getMessages().add("Error getting images.");
+			}		
+		}
 		ctx.json(result);
 	}
 }

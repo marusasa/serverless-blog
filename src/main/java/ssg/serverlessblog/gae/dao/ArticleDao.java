@@ -2,8 +2,6 @@ package ssg.serverlessblog.gae.dao;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.api.core.ApiFuture;
-import com.google.cloud.Timestamp;
 import com.google.cloud.firestore.AggregateQuery;
 import com.google.cloud.firestore.AggregateQuerySnapshot;
 import com.google.cloud.firestore.CollectionReference;
@@ -23,24 +20,12 @@ import com.google.cloud.firestore.Query.Direction;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.firestore.WriteResult;
-import com.google.cloud.vertexai.VertexAI;
-import com.google.cloud.vertexai.api.GenerateContentResponse;
-import com.google.cloud.vertexai.api.GenerationConfig;
-import com.google.cloud.vertexai.api.HarmCategory;
-import com.google.cloud.vertexai.api.SafetySetting;
-import com.google.cloud.vertexai.generativeai.ContentMaker;
-import com.google.cloud.vertexai.generativeai.GenerativeModel;
-import com.google.cloud.vertexai.generativeai.ResponseHandler;
-import com.google.cloud.vertexai.generativeai.ResponseStream;
 
-import ssg.serverlessblog.data_json.Article;
 import ssg.serverlessblog.documentref.ArticleDoc;
 import ssg.serverlessblog.documentref.ArticleLikeDoc;
 import ssg.serverlessblog.documentref.ArticleTagDoc;
-import ssg.serverlessblog.documentref.SettingDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
 import ssg.serverlessblog.interfaces.ArticleDaoInt;
-import ssg.serverlessblog.system.Env;
 import ssg.serverlessblog.util.AppConst;
 import ssg.serverlessblog.util.CloudDocument;
 
@@ -71,7 +56,7 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	private CollectionReference articles_tags = null;
-	private CollectionReference collectionTags() throws IOException {
+	private CollectionReference collectionArticleTags() throws IOException {
 		if(articles_tags == null) {
 			articles_tags = FirestoreDbUtil.getFirestoreDbObj().collection(ArticleTagDoc.collection);
 		}
@@ -82,7 +67,7 @@ public class ArticleDao implements ArticleDaoInt {
 	public List<CloudDocument> getArticleTags(String articleId) throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
-			final Query query = collectionTags()
+			final Query query = collectionArticleTags()
 					.whereEqualTo(ArticleTagDoc.field_article_id, articleId);
 			
 			final ApiFuture<QuerySnapshot> future = query.get();
@@ -101,65 +86,13 @@ public class ArticleDao implements ArticleDaoInt {
 	
 	
 	
-	@Override
-	public boolean updateArticleTag(String articleId, List<String> tagIds) throws Exception {
-		var result = false;
-		try {
-			List<CloudDocument> oldTags = getArticleTags(articleId);
-			//convert CloudDocument list to list of String
-			List<String> oldIds  = oldTags.stream().map(doc -> doc.getString(ArticleTagDoc.field_tag_id)).toList();
-			List<String> tagsToDelete = new ArrayList<>();
-			List<String> tagsToAdd = new ArrayList<>();
-			
-			//populate tagsToDelete
-			oldIds.stream().filter(oldId -> !tagIds.contains(oldId))
-					.forEach(oldId -> tagsToDelete.add(oldId));
-			
-			//populate tagsToAdd
-			if(tagIds.size() != oldTags.size()) {
-				tagIds.stream().filter(newId -> !oldIds.contains(newId)).forEach(newId -> tagsToAdd.add(newId));
-			}
-	 				
-			//delete unneeded tags
-			for(String deleteTagId: tagsToDelete) {
-				for(CloudDocument cd: oldTags) {
-					if(cd.getString(ArticleTagDoc.field_tag_id).equals(deleteTagId)) {
-						//delete document.
-						final DocumentReference docRef = collectionTags().document(cd.getId());					
-						final ApiFuture<DocumentSnapshot> future = docRef.get();
-						final DocumentSnapshot document = future.get();
-						if(document.exists()) {
-							final ApiFuture<WriteResult> writeResult = docRef.delete();
-							writeResult.get();
-						}				
-					}
-				}
-			}
-			
-			//add new tags
-			for(String addTagId: tagsToAdd) {
-				final Map<String, Object> data = new HashMap<>();
-				data.put(ArticleTagDoc.field_article_id, articleId);
-				data.put(ArticleTagDoc.field_tag_id, addTagId);
-				data.put(ArticleTagDoc.field_created_at, Timestamp.now());
-				final ApiFuture<DocumentReference> docRef = collectionTags().add(data);
-				docRef.get();
-			}
-			
-			result = true;
-		}catch(Exception e) {
-			logger.error("Error while updating Article Tag",e);			
-		}
-		return result;
-	}
-	
-	
+
 
 	@Override
 	public List<CloudDocument> getArticlesByTag(String tagId) throws Exception {
 		final List<CloudDocument> result = new ArrayList<CloudDocument>();
 		try {
-			final Query query = collectionTags()
+			final Query query = collectionArticleTags()
 					.whereEqualTo(ArticleTagDoc.field_tag_id, tagId);
 			
 			final ApiFuture<QuerySnapshot> future = query.get();
@@ -173,36 +106,6 @@ public class ArticleDao implements ArticleDaoInt {
 			throw e;
 		}
 		return result;
-	}
-
-	@Override
-	public long incrementArticleLike(final String articleId) throws Exception {
-		DocumentReference docRef = collectionLikes().document(articleId);			
-		ApiFuture<DocumentSnapshot> future = docRef.get();
-		DocumentSnapshot document = future.get();
-		long count = 0L;
-		if(!document.exists()) {				
-			//create new record.
-			count = 1L;
-			final Map<String, Object> data = new HashMap<>();
-			data.put(ArticleLikeDoc.field_like_count,count);
-			data.put(ArticleLikeDoc.field_updated_at, Timestamp.now());
-			final ApiFuture<WriteResult> wr = collectionLikes().document(articleId).set(data);
-			wr.get();
-			docRef = collectionLikes().document(articleId);
-			future = docRef.get();
-			document = future.get();
-		}else {
-			//Update record. Increment value.
-			count = document.getLong(ArticleLikeDoc.field_like_count);
-			count++;
-			final Map<String, Object> updates = new HashMap<>();
-			updates.put(ArticleLikeDoc.field_like_count,count);
-			updates.put(ArticleLikeDoc.field_updated_at, Timestamp.now());
-			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
-		    writeResult.get();
-		}
-		return count;		
 	}
 
 
@@ -222,35 +125,15 @@ public class ArticleDao implements ArticleDaoInt {
 
 
 	@Override
-	public String createArticle(final Article article) throws Exception {
+	public String createArticle(Map<String, Object> data) throws Exception {
 		var newId = "";
-		try {
-			//add article to database
-			final Map<String, Object> data = new HashMap<>();
-			data.put(ArticleDoc.field_title, article.title());
-			data.put(ArticleDoc.field_body, article.body());
-			data.put(ArticleDoc.field_status, article.status());
-			data.put(ArticleDoc.field_created_at, Timestamp.now());
-			if(article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
-				Timestamp now = Timestamp.now();
-				data.put(ArticleDoc.field_published_at, now);
-				data.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
-			}else {
-				data.put(ArticleDoc.field_published_at, null);
-				data.put(ArticleDoc.field_published_at_millisec, null);
-			}
-			data.put(ArticleDoc.field_updated_at, null);
-			data.put(ArticleDoc.field_summary, "");	//initially blank
-			data.put(ArticleDoc.field_summary_ai, true);
-			
-			final ApiFuture<DocumentReference> docRef = collection().add(data);
-			newId = docRef.get().getId();
-		}catch(Exception e) {
-			throw e;
-		}
+		
+		final ApiFuture<DocumentReference> docRef = collection().add(data);
+		newId = docRef.get().getId();
+		
 		return newId;
 	}
-
+	
 	@Override
 	public Optional<CloudDocument> getArticleForManage(final String articleId) 
 			throws Exception {
@@ -302,42 +185,14 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 
 	@Override
-	public boolean updateArticle(final Article article) throws Exception {
+	public boolean updateArticle(final String articleId, final Map<String, Object> data) throws Exception {
 		var result = false;
-		try {
-			final DocumentReference docRef = collection().document(article.articleId());
-			
-			final ApiFuture<DocumentSnapshot> future = docRef.get();
-			final DocumentSnapshot document = future.get();
-			if(!document.exists()) {
-				logger.warn("Article document not found: %s".formatted(article.articleId()));
-				return result;
-			}
-			 
-			//update document
-			final var oldStatus = document.getString(ArticleDoc.field_status);
-			final Map<String, Object> updates = new HashMap<>();
-			updates.put(ArticleDoc.field_title, article.title());
-			updates.put(ArticleDoc.field_body, article.body());
-			updates.put(ArticleDoc.field_status, article.status());
-			updates.put(ArticleDoc.field_updated_at, Timestamp.now());
-			updates.put(ArticleDoc.field_summary, article.summary());
-			updates.put(ArticleDoc.field_summary_ai, true);
-			
-			//published at logic
-			if(oldStatus.equals(AppConst.ART_STATUS_DRAFT) && article.status().equals(AppConst.ART_STATUS_PUBLISH)) {
-				Timestamp now = Timestamp.now();
-				updates.put(ArticleDoc.field_published_at, now);
-				updates.put(ArticleDoc.field_published_at_millisec, now.toDate().getTime());
-			}			
-			
-			final ApiFuture<WriteResult> writeResult = docRef.update(updates);
-		    writeResult.get();				
-			result = true;
-			
-		}catch(Exception e) {
-			throw e;
-		}
+		
+		final DocumentReference docRef = collection().document(articleId);			
+		final ApiFuture<WriteResult> writeResult = docRef.update(data);
+	    writeResult.get();				
+		result = true;
+		
 		return result;
 	}
 
@@ -352,11 +207,7 @@ public class ArticleDao implements ArticleDaoInt {
 			final QuerySnapshot qs = future.get();
 				
 			for (QueryDocumentSnapshot document : qs.getDocuments()) {
-				//make the response light
-				final var data = document.getData();
-				data.remove(ArticleDoc.field_body);
-				data.remove(ArticleDoc.field_summary);
-				result.add(new CloudDocument(document.getId(), data));
+				result.add(new CloudDocument(document.getId(), (DocumentSnapshot)document));
 			}
 		}catch(Exception e) {
 			throw e;
@@ -380,7 +231,7 @@ public class ArticleDao implements ArticleDaoInt {
 			final QuerySnapshot qs = future.get();
 				
 			for (QueryDocumentSnapshot document : qs.getDocuments()) {
-				result.add(new CloudDocument(document.getId(), document.getData()));
+				result.add(new CloudDocument(document.getId(), (DocumentSnapshot)document));
 			}
 		}catch(Exception e) {
 			throw e;
@@ -400,7 +251,7 @@ public class ArticleDao implements ArticleDaoInt {
 			final QuerySnapshot qs = future.get();
 				
 			for (QueryDocumentSnapshot document : qs.getDocuments()) {
-				result.add(new CloudDocument(document.getId(), document.getData()));
+				result.add(new CloudDocument(document.getId(), (DocumentSnapshot)document));
 			}
 		}catch(Exception e) {
 			throw e;
@@ -451,85 +302,54 @@ public class ArticleDao implements ArticleDaoInt {
 	}
 	
 	@Override
-	public String generateAiSummary(final String articleId) throws Exception {
-		final var result = new StringBuilder();
-		final Optional<CloudDocument> setting = Env.settingDao.getSetting();
-		try (VertexAI vertexAi = new VertexAI(setting.get().getString(SettingDoc.field_gae_ai_project_id), 
-				setting.get().getString(SettingDoc.field_gae_ai_location));) {
-			// get article
-			final Optional<CloudDocument> op = getArticleForManage(articleId);
-			if (op.isPresent()) {
-				final CloudDocument document = op.get();
-				final var text1 = document.getString(ArticleDoc.field_body);
-				final var textsi_1 = 
-						"""
-						You are a research bot, tasked with helping college students research quicker. 
-						Your job is to summarize the texts submitted to you.
-						Be sure to:
-						* keep your summaries under 160 characters
-						* present it so people will want to read the full text
-						* focus on the main points of the text
-						* keep it condense and to the point
-						* do not hallucinate
-						""";
-
-				final GenerationConfig generationConfig = GenerationConfig.newBuilder().setMaxOutputTokens(1024)
-						.setTemperature(2F).setTopP(0.95F).build();
-				final List<SafetySetting> safetySettings = Arrays.asList(
-						SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
-								.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
-						SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT)
-								.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
-						SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT)
-								.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
-						SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_HARASSMENT)
-								.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build());
-				final var systemInstruction = ContentMaker.fromMultiModalData(textsi_1);
-				final GenerativeModel model = new GenerativeModel.Builder().setModelName("gemini-1.5-flash-002")
-						.setVertexAi(vertexAi).setGenerationConfig(generationConfig).setSafetySettings(safetySettings)
-						.setSystemInstruction(systemInstruction).build();
-
-				
-				final var content = ContentMaker.fromMultiModalData(text1);
-				final ResponseStream<GenerateContentResponse> responseStream = model.generateContentStream(content);
-
-				responseStream.stream().forEach(t -> {
-					t.getCandidatesList().forEach(c -> {
-						result.append(c.getContent().getParts(0).getText());
-					});
-				});
-			}
-		}
-		return result.toString();
+	public boolean deleteArticleTag(final String tagId) throws Exception {
+		var result = false;
+		final DocumentReference docRef = collectionArticleTags().document(tagId);					
+		final ApiFuture<DocumentSnapshot> future = docRef.get();
+		final DocumentSnapshot document = future.get();
+		if(document.exists()) {
+			final ApiFuture<WriteResult> writeResult = docRef.delete();
+			writeResult.get();
+			result = true;
+		}	
+		return result;
 	}
-
-	public String generateAiGrammarCheck(final String prompt, final String content) throws Exception {
-		String output = "";
-		final Optional<CloudDocument> setting = Env.settingDao.getSetting();
-		try (VertexAI vertexAi = new VertexAI(setting.get().getString(SettingDoc.field_gae_ai_project_id), 
-				setting.get().getString(SettingDoc.field_gae_ai_location));) {
-			
-			final var completePrompt = "With the following text, " + prompt + "\n\nText: " + content; 
-
-			final GenerationConfig generationConfig = GenerationConfig.newBuilder().setMaxOutputTokens(1024)
-					.setTemperature(2F).setTopP(0.95F).build();
-			final List<SafetySetting> safetySettings = Arrays.asList(
-					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_HATE_SPEECH)
-							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
-					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT)
-							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
-					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT)
-							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build(),
-					SafetySetting.newBuilder().setCategory(HarmCategory.HARM_CATEGORY_HARASSMENT)
-							.setThreshold(SafetySetting.HarmBlockThreshold.OFF).build());
-			final GenerativeModel model = new GenerativeModel.Builder().setModelName("gemini-1.5-flash-002")
-					.setVertexAi(vertexAi).setGenerationConfig(generationConfig).setSafetySettings(safetySettings)
-					.build();
-
-			GenerateContentResponse response = model.generateContent(completePrompt);
-		    output = ResponseHandler.getText(response);
-		}
-		return output;
+	
+	@Override
+	public void createArticleTag(final Map<String, Object> data) throws Exception {
+		final ApiFuture<DocumentReference> docRef = collectionArticleTags().add(data);
+		docRef.get();
 	}
+	
+	@Override
+	public void createArticleLike(String articleId, Map<String, Object> data) throws Exception {		
+		final ApiFuture<WriteResult> wr = collectionLikes().document(articleId).set(data);
+		wr.get();
+		DocumentReference docRef = collectionLikes().document(articleId);
+		ApiFuture<DocumentSnapshot> future = docRef.get();
+		future.get();		
+	}
+	@Override
+	public Optional<CloudDocument> getArticleLike(final String articleId) throws Exception{
+		Optional<CloudDocument> result = Optional.empty();
+		DocumentReference docRef = collectionLikes().document(articleId);			
+		ApiFuture<DocumentSnapshot> future = docRef.get();
+		DocumentSnapshot document = future.get();
+		if(document.exists()) {
+			result = Optional.of(new CloudDocument(document.getId(),document));
+		}
+		return result;
+	}
+	
+	@Override
+	public boolean updateArticleLike(final String articleId,final Map<String, Object> data) throws Exception{
+		var result = false;
+		DocumentReference docRef = collectionLikes().document(articleId);
+		final ApiFuture<WriteResult> writeResult = docRef.update(data);
+	    writeResult.get();
+	    return result;
+	}
+	
+	
 	
 }

@@ -28,6 +28,7 @@ import ssg.serverlessblog.controller.LoginController;
 import ssg.serverlessblog.controller.PageComponentController;
 import ssg.serverlessblog.controller.SettingController;
 import ssg.serverlessblog.controller.TagController;
+import ssg.serverlessblog.daobase.SystemLogic;
 import ssg.serverlessblog.data_json.ResultBase;
 import ssg.serverlessblog.documentref.UserDoc;
 import ssg.serverlessblog.handler.AnalyticsHandler;
@@ -42,7 +43,6 @@ import ssg.serverlessblog.handler.PageComponentHandler;
 import ssg.serverlessblog.handler.ScheduledAnalyticsDailyProcess;
 import ssg.serverlessblog.handler.SitemapXmlHandler;
 import ssg.serverlessblog.handler.TagListHandler;
-import ssg.serverlessblog.util.AppProperties;
 
 /**
  * The main class that starts the server.
@@ -74,7 +74,8 @@ public class BlogMain {
 				jettyContext.getSessionHandler().getSessionCookieConfig().setPath("/mng");
 				jettyContext.getSessionHandler().getSessionCookieConfig().setMaxAge(31_536_000);	//365 days * 24h * 60min * 60 sec = 31,536,000
 			});
-						
+			
+			/*
 			if(AppProperties.getBoolean("env.is-test")) {
 				config.bundledPlugins.enableCors(cors -> {
 			        cors.addRule(it -> {
@@ -86,6 +87,7 @@ public class BlogMain {
 				//disable this for now. Conflict with cron job.
 				//config.bundledPlugins.enableSslRedirects();
 			}
+			*/
 			
 			//
 			/*----------------------------------------------------
@@ -227,6 +229,14 @@ public class BlogMain {
 			}
 		});
 		
+		try {
+			//create initial data only when mongo db
+			if(Env.isMongoDb()) {
+				SystemLogic.createInitialSystemData();
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		}
 		//Make sure datastore is ready.
 //		if(!AppProperties.getBoolean("env.skip-first-run")) {
 //			firstRun();		

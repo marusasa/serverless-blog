@@ -1,17 +1,18 @@
 package ssg.serverlessblog.gae.dao;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.WriteResult;
 
 import ssg.serverlessblog.documentref.UserDoc;
 import ssg.serverlessblog.gae.util.FirestoreDbUtil;
 import ssg.serverlessblog.interfaces.UserDaoInt;
-import ssg.serverlessblog.util.PasswordUtil;
+import ssg.serverlessblog.util.CloudDocument;
 
 /**
  * Data Access Object.
@@ -30,29 +31,21 @@ public class UserDao implements UserDaoInt {
 	}
 	
 	@Override
-	public boolean login(String username, String password) throws Exception {
-		boolean result = false;
-		try {
-			
-			final ApiFuture<DocumentSnapshot> future = collection().document(username).get();
-			final DocumentSnapshot docSnapshot = future.get();
-			if(docSnapshot.exists()) {
-				//user found.
-				final String passInDataStore = docSnapshot.getString(UserDoc.field_password);
-				//hash the provided password using a 'salt' value retrieved from data store.
-				final String passHash = PasswordUtil.hashPassword(password, 
-						docSnapshot.getString(UserDoc.field_salt)).get();
-				//compare the hashed value.
-				if(passInDataStore.equals(passHash)) {
-					//username and password match.
-					result = true;
-				}	
-			}
-		}catch(Exception e) {
-			throw e;
+	public Optional<CloudDocument> getUser(String username) throws Exception{
+		Optional<CloudDocument> result = Optional.empty();
+		final ApiFuture<DocumentSnapshot> future = collection().document(username).get();
+		final DocumentSnapshot docSnapshot = future.get();
+		if(docSnapshot.exists()) {
+			result = Optional.of(new CloudDocument(docSnapshot.getId(),docSnapshot));
 		}
-		
 		return result;
 	}
 
+	@Override
+	public void createUser(String userName, Map<String, Object> data) throws Exception {
+		final ApiFuture<WriteResult> future = collection().document(userName).set(data);
+		future.get();
+	}
+
+	
 }

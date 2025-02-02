@@ -6,8 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import io.javalin.http.Context;
 import io.javalin.http.Handler;
+import ssg.serverlessblog.daobase.AnalyticsLogic;
 import ssg.serverlessblog.data_json.ReqAnalytics;
-import ssg.serverlessblog.system.Env;
 
 /**
  * REST service for login.
@@ -21,11 +21,11 @@ public class AnalyticsHandler implements Handler {
 		try{
 			final ReqAnalytics data = ctx.bodyAsClass(ReqAnalytics.class);
 			if(data.state().equals("hidden&visible")) {
-				Env.analyticsDao.saveEvent(data.visitorId(), data.path(), "hidden");
+				AnalyticsLogic.saveEvent(data.visitorId(), data.path(), "hidden");
 				Thread.sleep(5);//sleep for short time
-				Env.analyticsDao.saveEvent(data.visitorId(), data.path(), "visible");
+				AnalyticsLogic.saveEvent(data.visitorId(), data.path(), "visible");
 			}else {
-				Env.analyticsDao.saveEvent(data.visitorId(), data.path(), data.state());
+				AnalyticsLogic.saveEvent(data.visitorId(), data.path(), data.state());
 			}
 		}catch(Exception e) {
 			logger.error("Error saving alaytics data.",e);
