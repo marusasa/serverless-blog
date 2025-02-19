@@ -1,4 +1,4 @@
-package ssg.serverlessblog.testdata;
+package ssg.serverlessblog.manualtests;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;

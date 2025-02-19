@@ -42,7 +42,7 @@ public class AnalyticsLogic {
 	}
 
 	static public void saveEvent(int visitorId, String path, String status) throws Exception {
-		if(AppProperties.getString("env.database").equals(AppConst.DB_FIRESTORE)) { 
+		if(Env.isAnalyticsSupported()) { 
 			Env.analyticsDao.saveEvent(visitorId, path, status);		
 		}
 	}

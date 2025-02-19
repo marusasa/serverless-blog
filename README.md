@@ -47,9 +47,9 @@ Run it with following commands:
 ```
 	docker network create sb-network
 	
-	docker run -d --network sb-network --name sb-mongo -p 27018:27017 mongo:latest
+	docker run -d --network sb-network --name sb-mongo -p 27017:27017 mongo:latest
 	
-	docker run -d -p 8080:8080 --network sb-network --name sb-serverless-blog sasagu/serverless-blog
+	docker run -d --network sb-network --name sb-serverless-blog -p 8080:8080 sasagu/serverless-blog
 
 ```
 
@@ -105,6 +105,12 @@ Name it '(default)'.
 		-->
 		<projectId></projectId>
 	</configuration>	
+```
+
+- Optionally, run this Maven command/goal for JUnit testing: 	
+
+```
+	clean test
 ```
 
 - Run this Maven command/goal to deploy it to Google App Engine: 	

@@ -81,6 +81,9 @@ public class Env {
 	public static boolean isMongoDb() {
 		return isMongoDb;
 	}
+	public static boolean isGae() {
+		return isGae;
+	}
 	
 	public static boolean isAiSupported() {
 		return isGae;		
