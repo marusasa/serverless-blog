@@ -53,7 +53,7 @@ Run it with following commands:
 
 ```
 
-Access the app from `http://localhost:8080`
+Access the app from `http://localhost:8080`. View the latest blog article for login info.
 
 # Running it on Google Cloud environment
 

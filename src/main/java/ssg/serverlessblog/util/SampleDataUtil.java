@@ -25,6 +25,7 @@ public class SampleDataUtil {
 					Login to the management console by clicking "Manage" from the side-bar:
 					
 					Username: admin
+					
 					Password: %s
 					""".formatted(password))
 				.status(AppConst.ART_STATUS_PUBLISH)

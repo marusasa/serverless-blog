@@ -4,7 +4,7 @@ FROM maven:3.9.9-eclipse-temurin-21 AS build
 COPY pom.xml .
 RUN mvn dependency:go-offline
 COPY src ./src
-RUN mvn package
+RUN mvn package -Dmaven.test.skip
 
 
 # Stage 2: Create the final image Java
@@ -22,13 +22,17 @@ ENTRYPOINT ["java", "-jar", "runner.jar"]
 #RUN echo "Hello from Dockerfile!"
 
 #-------------------------------------
+## build & publish:
 #
-# build with: docker build -t serverless-blog .
+# docker build -t sasagu/serverless-blog .
 #
-# run it with: 
+# docker push sasagu/serverless-blog
+#
+## run it with: 
 #
 # docker network create sb-network
 #
-# docker run -d --network sb-network --name sb-mongo -p 27018:27017 mongo:latest
+# docker run -d --network sb-network --name sb-mongo -p 27017:27017 mongo:latest
 #
-# docker run -d -p 8080:8080 --network sb-network --name sb-serverless-blog sasagu/serverless-blog 
+# docker run -d --network sb-network --name sb-serverless-blog -p 8080:8080 sasagu/serverless-blog 
+#

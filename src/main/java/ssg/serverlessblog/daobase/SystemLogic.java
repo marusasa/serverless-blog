@@ -39,9 +39,8 @@ public class SystemLogic {
 				final Map<String, Object> data = new HashMap<>();
 				final Optional<String> salt = PasswordUtil.generateSalt(30);
 				
-				//generate password
-				//pass = "blogPass_" + PasswordUtil.generateSalt(5).get();
-				pass = "pass123$";
+				//generate random password
+				pass = "pass_" + PasswordUtil.generateSalt(5).get();
 				
 				final Optional<String> password = PasswordUtil.hashPassword(pass,salt.get());
 				data.put(UserDoc.field_salt, salt.get());
