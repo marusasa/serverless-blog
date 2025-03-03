@@ -9,7 +9,7 @@ pipeline {
                 sh 'mvn -B -DskipTests clean package' 
                 sh 'pwd'
                 sh 'cd target'
-                sh 'mv *.jar runner.jar'
+                sh "mv '*.jar' 'runner.jar'"
                 sh '../'
             }
         }
