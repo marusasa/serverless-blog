@@ -6,11 +6,7 @@ pipeline {
     stages {
         stage('Build') { 
             steps {
-                sh 'mvn -B -DskipTests clean package' 
-                sh 'pwd'
-                sh 'cd target'
-                sh "mv '*.jar' 'runner.jar'"
-                sh '../'
+                sh 'mvn -B -DskipTests clean package'                
             }
         }
 		stage('Test') {
