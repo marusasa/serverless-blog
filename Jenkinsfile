@@ -7,14 +7,7 @@ pipeline {
         stage('Build') { 
             steps {
                 sh 'mvn -B -DskipTests clean package' 
-                script {
-	                fileOperations([
-	                    fileRenameOperation(
-	                        destination: 'target/runner.jar',
-	                        source: 'target/*.jar'
-	                    )
-	                ])
-	            }
+                sh 'mv target/*.jar target/runner.jar'
             }
         }
 		stage('Test') {
