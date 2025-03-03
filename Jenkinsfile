@@ -7,7 +7,8 @@ pipeline {
         stage('Build') { 
             steps {
                 sh 'mvn -B -DskipTests clean package' 
-                sh 'mv target/*.jar target/runner.jar'
+                sh 'pwd'
+                //sh 'mv target/*.jar target/runner.jar'
             }
         }
 		stage('Test') {
